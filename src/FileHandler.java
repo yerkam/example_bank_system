@@ -35,7 +35,7 @@ public class FileHandler {
      * @param active Client's account status
      * @param IBAN Client's account IBAN
      */
-    public void CreateAccount(String name, String surname,long id,int password, double balance, boolean active, String IBAN){
+    public void CreateAccount(String name, String surname,long id,int password, double balance, boolean active){
         // Check if the file exists, if not, print an error message and return
         Path path = Paths.get(fileName);
         if(!Files.exists(path)){
@@ -69,12 +69,13 @@ public class FileHandler {
 
         // If no duplicate ID is found, write the new account information to the file
         try(FileWriter writer = new FileWriter(fileName, true)){
-            writer.write("Checking#" + name + "#" + surname + "#" + id + "#" + password + "#" + balance + "#" + active + "#" + IBAN + "\n");
+            writer.write("Checking#" + name + "#" + surname + "#" + id + "#" + password + "#" + balance + "#" + active + "#" + generateIBAN() + "\n");
             writer.close();
         }catch(Exception e){
             System.out.println("An error occurred while creating the account: " + e.getMessage());
         }
     }
+
 
     /**
      * This method creates an account and writes the account information to a file.
@@ -162,9 +163,6 @@ public class FileHandler {
     }
 
 
-
-
-
     /**
      * This method creates a file if it does not exist.
      * @param fileName The name of the file to be created.
@@ -187,5 +185,39 @@ public class FileHandler {
         }catch(Exception e){
             System.out.println("An error occurred while creating the file: " + e.getMessage());
         }
+    }
+
+
+    /**
+     * This method creates IBAN for the new accounts.
+     * @return A unique IBAN number for the new account.
+     */
+    private int generateIBAN(){
+
+        int randomNum = (int)(Math.random() * 1000000000);
+        File myObj = new File(fileName);
+        try (Scanner myReader = new Scanner(myObj)) {
+            long line = 0; 
+            while (myReader.hasNextLine()) {
+                line++;
+                String data = myReader.nextLine();
+                String[] parts = data.split("#");
+                if(parts[0].equals("Checking")){
+                    if (parts.length >= 6) { 
+                        int storedIBANs  = Integer.parseInt(parts[7]);
+                        if (storedIBANs == randomNum) {
+                            return generateIBAN(); // Generate a new IBAN if it already exists
+                        }
+                    }else{
+                        System.out.println("Invalid account data at line :" + line);
+                    }
+                }
+            }
+
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+        return randomNum;
     }
 }
