@@ -13,5 +13,12 @@ public class BankSystem {
     public void createCurrencyAccount(String name, String surname, long id, int password, double initialDeposit, String currency) {
         fh.createCurrencyAccount(name, surname, id, password, initialDeposit, currency);
     }
+    public String createDebitCard(long accountId, String holderName) {
+        return fh.createDebitCard(accountId, holderName);
+    }
+
+    public String createCreditCard(long accountId, String holderName, double creditLimit, int paymentDay) {
+        return fh.createCreditCard(accountId, holderName, creditLimit, paymentDay);
+    }
 }
 

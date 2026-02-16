@@ -22,7 +22,8 @@ public class FileHandler {
     private final String depositFile;
     private final String currencyFile;
     private final String frozenAccountsFile;
-
+    private final String debitCardsFile;
+    private final String creditCardsFile;
     public FileHandler() {
         // Set the data folder name (hidden on non-Windows)
         String folderName = "data";
@@ -38,7 +39,8 @@ public class FileHandler {
         this.depositFile = dataFolderName + File.separator + "Deposit.txt";
         this.currencyFile = dataFolderName + File.separator + "Currency.txt";
         this.frozenAccountsFile = dataFolderName + File.separator + "FrozenAccounts.txt";
-
+        this.debitCardsFile = dataFolderName + File.separator + "DebitCards.txt";
+        this.creditCardsFile = dataFolderName + File.separator + "CreditCards.txt";
         initializeFolderStructure();
     }
 
@@ -92,6 +94,17 @@ public class FileHandler {
             Path frozenAccountsPath = Paths.get(frozenAccountsFile);
             if (!Files.exists(frozenAccountsPath)) {
                 Files.createFile(frozenAccountsPath);
+            }
+            // Create DebitCards.txt in data folder
+            Path debitCardsPath = Paths.get(debitCardsFile);
+            if (!Files.exists(debitCardsPath)) {
+                Files.createFile(debitCardsPath);
+            }
+
+            // Create CreditCards.txt in data folder
+            Path creditCardsPath = Paths.get(creditCardsFile);
+            if (!Files.exists(creditCardsPath)) {
+                Files.createFile(creditCardsPath);
             }
 
         } catch (Exception e) {
@@ -175,12 +188,7 @@ public class FileHandler {
             return true;
         }
         // Check in deposit accounts
-        if (checkAccountInFile(id, password, depositFile)) {
-            return true;
-        }
-        // Check in currency accounts
-        return checkAccountInFile(id, password, currencyFile);
-        
+        return checkAccountInFile(id, password, depositFile);
     }
 
 
@@ -506,7 +514,7 @@ public class FileHandler {
             return false;
         }
     }
-    /**
+      /**
      * This method creates a currency account and writes the account information to a file.
      * Supports USD and EUR currencies with fixed exchange rates.
      * 
@@ -541,5 +549,254 @@ public class FileHandler {
         } catch (Exception e) {
             System.out.println("An error occurred while creating the account: " + e.getMessage());
         }
+    }
+    /**
+     * Generates a unique 16-digit card number.
+     * @return A unique 16-digit card number as a String.
+     */
+    private String generateCardNumber() {
+        SecureRandom random = new SecureRandom();
+        StringBuilder cardNumber = new StringBuilder();
+        
+        // Generate 16 digits
+        for (int i = 0; i < 16; i++) {
+            cardNumber.append(random.nextInt(10));
+        }
+        
+        String generatedNumber = cardNumber.toString();
+        
+        // Check if the card number already exists in debit or credit cards
+        if (isCardNumberExists(generatedNumber)) {
+            return generateCardNumber(); // Recursively generate a new number
+        }
+        
+        return generatedNumber;
+    }
+
+
+    /**
+     * Checks if a card number already exists in debit or credit card files.
+     * @param cardNumber The card number to check.
+     * @return true if the card number exists, false otherwise.
+     */
+    private boolean isCardNumberExists(String cardNumber) {
+        try {
+            // Check in debit cards
+            Path debitPath = Paths.get(debitCardsFile);
+            if (Files.exists(debitPath)) {
+                for (String line : Files.readAllLines(debitPath)) {
+                    if (line.trim().isEmpty()) continue;
+                    String[] parts = line.split("#");
+                    if (parts.length >= 2 && parts[1].equals(cardNumber)) {
+                        return true;
+                    }
+                }
+            }
+            
+            // Check in credit cards
+            Path creditPath = Paths.get(creditCardsFile);
+            if (Files.exists(creditPath)) {
+                for (String line : Files.readAllLines(creditPath)) {
+                    if (line.trim().isEmpty()) continue;
+                    String[] parts = line.split("#");
+                    if (parts.length >= 2 && parts[1].equals(cardNumber)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error checking card number: " + e.getMessage());
+        }
+        return false;
+    }
+
+
+    /**
+     * Generates a random 3-digit CVV number.
+     * @return A 3-digit CVV as a String.
+     */
+    private String generateCVV() {
+        SecureRandom random = new SecureRandom();
+        int cvv = 100 + random.nextInt(900); // Range: 100-999
+        return String.valueOf(cvv);
+    }
+
+
+    /**
+     * Generates an expiry date for a card (5 years from now).
+     * @return Expiry date in MM/YY format.
+     */
+    private String generateExpiryDate() {
+        LocalDate now = LocalDate.now();
+        LocalDate expiryDate = now.plusYears(5);
+        int month = expiryDate.getMonthValue();
+        int year = expiryDate.getYear() % 100; // Last 2 digits of year
+        return String.format("%02d/%02d", month, year);
+    }
+
+
+    /**
+     * Creates a debit card linked to a checking account.
+     * 
+     * @param accountId The ID of the checking account to link the card to.
+     * @param holderName The name of the cardholder (typically first name + surname).
+     * @return The generated card number, or null if creation failed.
+     */
+    public String createDebitCard(long accountId, String holderName) {
+        Path path = Paths.get(debitCardsFile);
+        if (!Files.exists(path)) {
+            System.out.println("The debit cards file does not exist. Card creation failed.");
+            return null;
+        }
+
+        // Check if the account exists in checking accounts
+        if (!isAccountExists(accountId, checkingAccountFile)) {
+            System.out.println("No checking account found with ID " + accountId + ". Card creation failed.");
+            return null;
+        }
+
+        // Check if a debit card already exists for this account
+        if (isDebitCardExists(accountId)) {
+            System.out.println("A debit card already exists for account ID " + accountId + ". Card creation failed.");
+            return null;
+        }
+
+        try (FileWriter writer = new FileWriter(debitCardsFile, true)) {
+            String cardNumber = generateCardNumber();
+            String cvv = generateCVV();
+            String expiryDate = generateExpiryDate();
+            
+            writer.write("DebitCard#" + cardNumber + "#" + cvv + "#" + expiryDate + "#" + holderName + "#" + accountId + "\n");
+            return cardNumber;
+        } catch (Exception e) {
+            System.out.println("An error occurred while creating the debit card: " + e.getMessage());
+            return null;
+        }
+    }
+
+
+    /**
+     * Creates a credit card with a specified credit limit.
+     * 
+     * @param accountId The ID to associate with this credit card.
+     * @param holderName The name of the cardholder.
+     * @param creditLimit The credit limit for the card.
+     * @param paymentDay The day of the month for payment (1-28).
+     * @return The generated card number, or null if creation failed.
+     */
+    public String createCreditCard(long accountId, String holderName, double creditLimit, int paymentDay) {
+        Path path = Paths.get(creditCardsFile);
+        if (!Files.exists(path)) {
+            System.out.println("The credit cards file does not exist. Card creation failed.");
+            return null;
+        }
+
+        // Validate payment day
+        if (paymentDay < 1 || paymentDay > 28) {
+            System.out.println("Invalid payment day. Must be between 1 and 28. Card creation failed.");
+            return null;
+        }
+
+        // Check if account ID is already used for a credit card
+        if (isCreditCardExists(accountId)) {
+            System.out.println("A credit card already exists for account ID " + accountId + ". Card creation failed.");
+            return null;
+        }
+
+        try (FileWriter writer = new FileWriter(creditCardsFile, true)) {
+            String cardNumber = generateCardNumber();
+            String cvv = generateCVV();
+            String expiryDate = generateExpiryDate();
+            double availableLimit = creditLimit; // Initially, available limit equals credit limit
+            double debt = 0.0; // No debt initially
+            
+            writer.write("CreditCard#" + cardNumber + "#" + cvv + "#" + expiryDate + "#" + holderName + "#" + accountId + "#" + creditLimit + "#" + availableLimit + "#" + debt + "#" + paymentDay + "\n");
+            return cardNumber;
+        } catch (Exception e) {
+            System.out.println("An error occurred while creating the credit card: " + e.getMessage());
+            return null;
+        }
+    }
+
+
+    /**
+     * Checks if an account exists in a specific file.
+     * @param accountId The account ID to check.
+     * @param filePath The file path to check in.
+     * @return true if the account exists, false otherwise.
+     */
+    private boolean isAccountExists(long accountId, String filePath) {
+        try {
+            Path path = Paths.get(filePath);
+            if (Files.exists(path)) {
+                for (String line : Files.readAllLines(path)) {
+                    if (line.trim().isEmpty()) continue;
+                    String[] parts = line.split("#");
+                    if (parts.length >= 4) {
+                        long storedId = Long.parseLong(parts[3]);
+                        if (storedId == accountId) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error checking account existence: " + e.getMessage());
+        }
+        return false;
+    }
+
+
+    /**
+     * Checks if a debit card already exists for a given account ID.
+     * @param accountId The account ID to check.
+     * @return true if a debit card exists for this account, false otherwise.
+     */
+    private boolean isDebitCardExists(long accountId) {
+        try {
+            Path path = Paths.get(debitCardsFile);
+            if (Files.exists(path)) {
+                for (String line : Files.readAllLines(path)) {
+                    if (line.trim().isEmpty()) continue;
+                    String[] parts = line.split("#");
+                    if (parts.length >= 6) {
+                        long storedAccountId = Long.parseLong(parts[5]);
+                        if (storedAccountId == accountId) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error checking debit card existence: " + e.getMessage());
+        }
+        return false;
+    }
+
+
+    /**
+     * Checks if a credit card already exists for a given account ID.
+     * @param accountId The account ID to check.
+     * @return true if a credit card exists for this account, false otherwise.
+     */
+    private boolean isCreditCardExists(long accountId) {
+        try {
+            Path path = Paths.get(creditCardsFile);
+            if (Files.exists(path)) {
+                for (String line : Files.readAllLines(path)) {
+                    if (line.trim().isEmpty()) continue;
+                    String[] parts = line.split("#");
+                    if (parts.length >= 6) {
+                        long storedAccountId = Long.parseLong(parts[5]);
+                        if (storedAccountId == accountId) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error checking credit card existence: " + e.getMessage());
+        }
+        return false;
     }
 }
