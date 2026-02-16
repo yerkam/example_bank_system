@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Scanner;
 
@@ -329,9 +330,10 @@ public class FileHandler {
      */
     private String generateReactivationPassword() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom secureRandom = new SecureRandom();
         StringBuilder password = new StringBuilder();
         for (int i = 0; i < 12; i++) {
-            int index = (int) (Math.random() * characters.length());
+            int index = secureRandom.nextInt(characters.length());
             password.append(characters.charAt(index));
         }
         return password.toString();
