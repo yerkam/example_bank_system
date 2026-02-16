@@ -36,7 +36,6 @@ public class FileHandler {
         this.depositFile = dataFolderName + File.separator + "Deposit.txt";
         this.currencyFile = dataFolderName + File.separator + "Currency.txt";
 
-        // Initialize folder structure
         initializeFolderStructure();
     }
 
@@ -153,7 +152,7 @@ public class FileHandler {
         }
     }
 
-    
+
     /**
      * This method checks if an account exists in the file based on the provided ID and password.
      *
@@ -169,6 +168,7 @@ public class FileHandler {
         // Check in deposit accounts
         return checkAccountInFile(id, password, depositFile);
     }
+
 
     /**
      * Helper method to check if an account exists in a specific file.
@@ -206,6 +206,7 @@ public class FileHandler {
         return false;
     }
 
+
     /**
      * Checks whether an account with the given ID already exists in the specified file.
      *
@@ -242,19 +243,40 @@ public class FileHandler {
 
 
     /**
-     * Returns the path to the transaction history folder.
-     * @return Path to the transaction history folder.
+     * This method retrieves the transaction history for a given account ID and returns it as a 2D array.
+     * @param id The account ID for which to retrieve the transaction history.
+     * @return A 2D array containing the transaction history, where each row represents a transaction with its ID, amount, and date.
      */
-    public String getTransactionHistoryPath() {
-        return transactionHistoryPath;
-    }
-
-    /**
-     * Returns the path to the currency file.
-     * @return Path to the currency file.
-     */
-    public String getCurrencyFile() {
-        return currencyFile;
+    public String[][] getTransactionHistory(long id) {
+        TransactionList transactionList = new TransactionList();
+        String filePath = transactionHistoryPath + File.separator + id + ".txt";
+        File myObj = new File(filePath);
+        if (!myObj.exists()) {
+            return transactionList.toArray(); // Return empty list if no transaction history exists
+        }
+        try (Scanner myReader = new Scanner(myObj)) {
+            long lineNum = 0;
+            while (myReader.hasNextLine()) {
+                lineNum++;
+                String data = myReader.nextLine();
+                if (data.trim().isEmpty()) {
+                    continue;
+                }
+                String[] parts = data.split("#");
+                if (parts.length == 3) {
+                    long transactionId = Long.parseLong(parts[0]);
+                    int amount = Integer.parseInt(parts[1]);
+                    String date = parts[2];
+                    transactionList.add(transactionId, amount, date);
+                } else {
+                    System.out.println("Invalid transaction data at line: " + lineNum);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred while reading the transaction history.");
+            e.printStackTrace();
+        }
+        return transactionList.toArray();
     }
 
 
