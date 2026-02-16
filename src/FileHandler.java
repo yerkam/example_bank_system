@@ -175,7 +175,12 @@ public class FileHandler {
             return true;
         }
         // Check in deposit accounts
-        return checkAccountInFile(id, password, depositFile);
+        if (checkAccountInFile(id, password, depositFile)) {
+            return true;
+        }
+        // Check in currency accounts
+        return checkAccountInFile(id, password, currencyFile);
+        
     }
 
 
@@ -499,6 +504,42 @@ public class FileHandler {
         } catch (Exception e) {
             System.out.println("An error occurred while reactivating the account: " + e.getMessage());
             return false;
+        }
+    }
+    /**
+     * This method creates a currency account and writes the account information to a file.
+     * Supports USD and EUR currencies with fixed exchange rates.
+     * 
+     * @param name     Client's name
+     * @param surname  Client's surname
+     * @param id       Client's ID
+     * @param password Client's password
+     * @param balance  Client's account balance
+     * @param currency Currency type (USD or EUR)
+     */
+
+    public void createCurrencyAccount(String name, String surname, long id, int password, double balance, String currency) {
+        Path path = Paths.get(currencyFile);
+        if (!Files.exists(path)) {
+            System.out.println("The file does not exist. Account creation failed.");
+            return;
+        }
+
+        // Validate currency type
+        if (!currency.equals("USD") && !currency.equals("EUR")) {
+            System.out.println("Invalid currency type. Only USD and EUR are supported. Account creation failed.");
+            return;
+        }
+
+        if (isDuplicateId(id, currencyFile)) {
+            System.out.println("An account with the same ID already exists. Account creation failed.");
+            return;
+        }
+
+        try (FileWriter writer = new FileWriter(currencyFile, true)) {
+            writer.write("Currency#" + name + "#" + surname + "#" + id + "#" + password + "#" + balance + "#" + currency + "\n");
+        } catch (Exception e) {
+            System.out.println("An error occurred while creating the account: " + e.getMessage());
         }
     }
 }

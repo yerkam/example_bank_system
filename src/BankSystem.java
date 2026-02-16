@@ -10,4 +10,8 @@ public class BankSystem {
     public void createSavingsAccount(String name,String surname, long id, int password, double initialDeposit, int months) {
         fh.createDepositAccount(name, surname, id, password, initialDeposit, months);
     }
+    public void createCurrencyAccount(String name, String surname, long id, int password, double initialDeposit, String currency) {
+        fh.createCurrencyAccount(name, surname, id, password, initialDeposit, currency);
+    }
 }
+

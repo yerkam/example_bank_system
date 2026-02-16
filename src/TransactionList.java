@@ -51,11 +51,11 @@ public class TransactionList {
 class TransactionNode {
     private TransactionNode prev;
     private long ID;       
-    private int amount; 
+    private double amount; 
     private String date;
     private TransactionNode next; 
 
-    public TransactionNode(long ID, int amount, String date) {
+    public TransactionNode(long ID, double amount, String date) {
         this.prev = null;
         this.ID = ID;
         this.amount = amount;
@@ -83,7 +83,7 @@ class TransactionNode {
         return ID;
     }
 
-    public int getamount() {
+    public double getamount() {
         return amount;
     }
 
