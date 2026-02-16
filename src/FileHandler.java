@@ -20,6 +20,7 @@ public class FileHandler {
     private final String transactionHistoryPath;
     private final String depositFile;
     private final String currencyFile;
+    private final String frozenAccountsFile;
 
     public FileHandler() {
         // Set the data folder name (hidden on non-Windows)
@@ -35,6 +36,7 @@ public class FileHandler {
         this.transactionHistoryPath = checkingFolderPath + File.separator + "transaction history";
         this.depositFile = dataFolderName + File.separator + "Deposit.txt";
         this.currencyFile = dataFolderName + File.separator + "Currency.txt";
+        this.frozenAccountsFile = dataFolderName + File.separator + "FrozenAccounts.txt";
 
         initializeFolderStructure();
     }
@@ -83,6 +85,12 @@ public class FileHandler {
             Path currencyPath = Paths.get(currencyFile);
             if (!Files.exists(currencyPath)) {
                 Files.createFile(currencyPath);
+            }
+
+            // Create FrozenAccounts.txt in data folder
+            Path frozenAccountsPath = Paths.get(frozenAccountsFile);
+            if (!Files.exists(frozenAccountsPath)) {
+                Files.createFile(frozenAccountsPath);
             }
 
         } catch (Exception e) {
@@ -312,5 +320,183 @@ public class FileHandler {
             e.printStackTrace();
         }
         return randomNum;
+    }
+
+
+    /**
+     * Generates a random alphanumeric password for account reactivation.
+     * @return A random alphanumeric password string of 12 characters.
+     */
+    private String generateReactivationPassword() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder password = new StringBuilder();
+        for (int i = 0; i < 12; i++) {
+            int index = (int) (Math.random() * characters.length());
+            password.append(characters.charAt(index));
+        }
+        return password.toString();
+    }
+
+
+    /**
+     * Freezes a checking account by setting its status to false and generating a reactivation password.
+     * The reactivation password is stored in FrozenAccounts.txt.
+     * 
+     * @param id The ID of the account to freeze.
+     * @return The reactivation password, or null if the operation failed.
+     */
+    public String freezeAccount(long id) {
+        try {
+            Path accountPath = Paths.get(checkingAccountFile);
+            if (!Files.exists(accountPath)) {
+                System.out.println("The account file does not exist.");
+                return null;
+            }
+
+            // Read all lines from the account file
+            java.util.List<String> lines = Files.readAllLines(accountPath);
+            boolean accountFound = false;
+            
+            // Find and update the account
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+                String[] parts = line.split("#");
+                if (parts.length >= 7 && parts[0].equals("Checking")) {
+                    long storedId = Long.parseLong(parts[3]);
+                    if (storedId == id) {
+                        // Check if already frozen
+                        boolean currentStatus = Boolean.parseBoolean(parts[6]);
+                        if (!currentStatus) {
+                            System.out.println("Account is already frozen.");
+                            return null;
+                        }
+                        
+                        // Set status to false
+                        parts[6] = "false";
+                        lines.set(i, String.join("#", parts));
+                        accountFound = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!accountFound) {
+                System.out.println("Account with ID " + id + " not found.");
+                return null;
+            }
+
+            // Write the updated lines back to the file
+            Files.write(accountPath, lines);
+
+            // Generate reactivation password
+            String reactivationPassword = generateReactivationPassword();
+
+            // Store the password in FrozenAccounts.txt
+            try (FileWriter writer = new FileWriter(frozenAccountsFile, true)) {
+                writer.write(id + "#" + reactivationPassword + "\n");
+            }
+
+            return reactivationPassword;
+
+        } catch (Exception e) {
+            System.out.println("An error occurred while freezing the account: " + e.getMessage());
+            return null;
+        }
+    }
+
+
+    /**
+     * Reactivates a frozen checking account if the provided password matches the stored reactivation password.
+     * Sets the account status back to true and removes the entry from FrozenAccounts.txt.
+     * 
+     * @param id The ID of the account to reactivate.
+     * @param password The reactivation password.
+     * @return true if the account was successfully reactivated, false otherwise.
+     */
+    public boolean reactivateAccount(long id, String password) {
+        try {
+            Path frozenPath = Paths.get(frozenAccountsFile);
+            if (!Files.exists(frozenPath)) {
+                System.out.println("The frozen accounts file does not exist.");
+                return false;
+            }
+
+            // Read all lines from FrozenAccounts.txt
+            java.util.List<String> frozenLines = Files.readAllLines(frozenPath);
+            boolean passwordMatches = false;
+            int matchingLineIndex = -1;
+
+            // Check if the password matches
+            for (int i = 0; i < frozenLines.size(); i++) {
+                String line = frozenLines.get(i);
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+                String[] parts = line.split("#");
+                if (parts.length >= 2) {
+                    long storedId = Long.parseLong(parts[0]);
+                    String storedPassword = parts[1];
+                    if (storedId == id && storedPassword.equals(password)) {
+                        passwordMatches = true;
+                        matchingLineIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            if (!passwordMatches) {
+                System.out.println("Invalid reactivation password or account not found in frozen accounts.");
+                return false;
+            }
+
+            // Update the account status in account.txt
+            Path accountPath = Paths.get(checkingAccountFile);
+            if (!Files.exists(accountPath)) {
+                System.out.println("The account file does not exist.");
+                return false;
+            }
+
+            java.util.List<String> accountLines = Files.readAllLines(accountPath);
+            boolean accountUpdated = false;
+
+            for (int i = 0; i < accountLines.size(); i++) {
+                String line = accountLines.get(i);
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+                String[] parts = line.split("#");
+                if (parts.length >= 7 && parts[0].equals("Checking")) {
+                    long storedId = Long.parseLong(parts[3]);
+                    if (storedId == id) {
+                        // Set status to true
+                        parts[6] = "true";
+                        accountLines.set(i, String.join("#", parts));
+                        accountUpdated = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!accountUpdated) {
+                System.out.println("Account with ID " + id + " not found in account file.");
+                return false;
+            }
+
+            // Write the updated account lines back
+            Files.write(accountPath, accountLines);
+
+            // Remove the entry from FrozenAccounts.txt
+            frozenLines.remove(matchingLineIndex);
+            Files.write(frozenPath, frozenLines);
+
+            return true;
+
+        } catch (Exception e) {
+            System.out.println("An error occurred while reactivating the account: " + e.getMessage());
+            return false;
+        }
     }
 }
