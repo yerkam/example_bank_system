@@ -14,19 +14,80 @@ import java.util.Scanner;
  */
 public class FileHandler {
 
-    private final String fileName;
+    private final String dataFolderName;
+    private final String checkingFolderPath;
+    private final String checkingAccountFile;
+    private final String transactionHistoryPath;
+    private final String depositFile;
+    private final String currencyFile;
 
     public FileHandler() {
-        String name = "Accounts.txt";
-        // On non-Windows OS, prefix with "." to hide the file
-        if (!System.getProperty("os.name").toLowerCase().contains("win") && !name.startsWith(".")) {
-            name = "." + name;
+        // Set the data folder name (hidden on non-Windows)
+        String folderName = "data";
+        if (!System.getProperty("os.name").toLowerCase().contains("win")) {
+            folderName = "." + folderName;
         }
-        this.fileName = name;
+        this.dataFolderName = folderName;
+        
+        // Define paths for the folder structure
+        this.checkingFolderPath = dataFolderName + File.separator + "Checking";
+        this.checkingAccountFile = checkingFolderPath + File.separator + "account.txt";
+        this.transactionHistoryPath = checkingFolderPath + File.separator + "transaction history";
+        this.depositFile = dataFolderName + File.separator + "Deposit.txt";
+        this.currencyFile = dataFolderName + File.separator + "Currency.txt";
 
-        Path path = Paths.get(fileName);
-        if (!Files.exists(path)) {
-            createFile(fileName);
+        // Initialize folder structure
+        initializeFolderStructure();
+    }
+
+    /**
+     * Initializes the folder structure for account management.
+     * Creates the hidden data folder with Checking folder, Deposit.txt, and Currency.txt.
+     */
+    private void initializeFolderStructure() {
+        try {
+            // Create main data folder
+            Path dataPath = Paths.get(dataFolderName);
+            if (!Files.exists(dataPath)) {
+                Files.createDirectory(dataPath);
+                // Hide the folder on Windows
+                if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                    Files.setAttribute(dataPath, "dos:hidden", true);
+                }
+            }
+
+            // Create Checking folder
+            Path checkingPath = Paths.get(checkingFolderPath);
+            if (!Files.exists(checkingPath)) {
+                Files.createDirectory(checkingPath);
+            }
+
+            // Create account.txt inside Checking folder
+            Path accountPath = Paths.get(checkingAccountFile);
+            if (!Files.exists(accountPath)) {
+                Files.createFile(accountPath);
+            }
+
+            // Create transaction history folder inside Checking folder
+            Path transactionPath = Paths.get(transactionHistoryPath);
+            if (!Files.exists(transactionPath)) {
+                Files.createDirectory(transactionPath);
+            }
+
+            // Create Deposit.txt in data folder
+            Path depositPath = Paths.get(depositFile);
+            if (!Files.exists(depositPath)) {
+                Files.createFile(depositPath);
+            }
+
+            // Create Currency.txt in data folder
+            Path currencyPath = Paths.get(currencyFile);
+            if (!Files.exists(currencyPath)) {
+                Files.createFile(currencyPath);
+            }
+
+        } catch (Exception e) {
+            System.out.println("An error occurred while initializing folder structure: " + e.getMessage());
         }
     }
 
@@ -42,18 +103,18 @@ public class FileHandler {
      * @param active   Client's account status
      */
     public void createCheckingAccount(String name, String surname, long id, int password, double balance, boolean active) {
-        Path path = Paths.get(fileName);
+        Path path = Paths.get(checkingAccountFile);
         if (!Files.exists(path)) {
             System.out.println("The file does not exist. Account creation failed.");
             return;
         }
 
-        if (isDuplicateId(id)) {
+        if (isDuplicateId(id, checkingAccountFile)) {
             System.out.println("An account with the same ID already exists. Account creation failed.");
             return;
         }
 
-        try (FileWriter writer = new FileWriter(fileName, true)) {
+        try (FileWriter writer = new FileWriter(checkingAccountFile, true)) {
             writer.write("Checking#" + name + "#" + surname + "#" + id + "#" + password + "#" + balance + "#" + active + "#" + generateIBAN() + "\n");
         } catch (Exception e) {
             System.out.println("An error occurred while creating the account: " + e.getMessage());
@@ -72,18 +133,18 @@ public class FileHandler {
      * @param months   Client's account duration in months
      */
     public void createDepositAccount(String name, String surname, long id, int password, double balance, int months) {
-        Path path = Paths.get(fileName);
+        Path path = Paths.get(depositFile);
         if (!Files.exists(path)) {
             System.out.println("The file does not exist. Account creation failed.");
             return;
         }
 
-        if (isDuplicateId(id)) {
+        if (isDuplicateId(id, depositFile)) {
             System.out.println("An account with the same ID already exists. Account creation failed.");
             return;
         }
 
-        try (FileWriter writer = new FileWriter(fileName, true)) {
+        try (FileWriter writer = new FileWriter(depositFile, true)) {
             LocalDate date = LocalDate.now();
             LocalDate expiryDate = date.plusMonths(months);
             writer.write("Deposit#" + name + "#" + surname + "#" + id + "#" + password + "#" + balance + "#" + expiryDate + "\n");
@@ -101,8 +162,25 @@ public class FileHandler {
      * @return true if the account exists and the password matches, false otherwise.
      */
     public boolean checkAccount(long id, int password) {
+        // Check in checking accounts
+        if (checkAccountInFile(id, password, checkingAccountFile)) {
+            return true;
+        }
+        // Check in deposit accounts
+        return checkAccountInFile(id, password, depositFile);
+    }
+
+    /**
+     * Helper method to check if an account exists in a specific file.
+     *
+     * @param id       Client's ID
+     * @param password Client's password
+     * @param filePath Path to the file to check
+     * @return true if the account exists and the password matches, false otherwise.
+     */
+    private boolean checkAccountInFile(long id, int password, String filePath) {
         try {
-            Path path = Paths.get(fileName);
+            Path path = Paths.get(filePath);
             if (Files.exists(path)) {
                 for (String line : Files.readAllLines(path)) {
                     if (line.trim().isEmpty()) {
@@ -120,7 +198,7 @@ public class FileHandler {
                     }
                 }
             } else {
-                System.out.println("The file does not exist.");
+                System.out.println("The file does not exist: " + filePath);
             }
         } catch (Exception e) {
             System.out.println("An error occurred while checking the account: " + e.getMessage());
@@ -129,13 +207,14 @@ public class FileHandler {
     }
 
     /**
-     * Checks whether an account with the given ID already exists in the file.
+     * Checks whether an account with the given ID already exists in the specified file.
      *
-     * @param id The ID to check for duplicates.
+     * @param id       The ID to check for duplicates.
+     * @param filePath The path to the file to check.
      * @return true if a duplicate ID is found, false otherwise.
      */
-    private boolean isDuplicateId(long id) {
-        File myObj = new File(fileName);
+    private boolean isDuplicateId(long id, String filePath) {
+        File myObj = new File(filePath);
         try (Scanner myReader = new Scanner(myObj)) {
             long lineNum = 0;
             while (myReader.hasNextLine()) {
@@ -163,24 +242,19 @@ public class FileHandler {
 
 
     /**
-     * This method creates a file if it does not exist.
-     *
-     * @param fileName The name of the file to be created.
+     * Returns the path to the transaction history folder.
+     * @return Path to the transaction history folder.
      */
-    private void createFile(String fileName) {
-        try {
-            Path path = Paths.get(fileName);
+    public String getTransactionHistoryPath() {
+        return transactionHistoryPath;
+    }
 
-            // Create the file
-            Files.createFile(path);
-
-            // If the operating system is Windows, set the file attribute to hidden
-            if (System.getProperty("os.name").toLowerCase().contains("win")) {
-                Files.setAttribute(path, "dos:hidden", true);
-            }
-        } catch (Exception e) {
-            System.out.println("An error occurred while creating the file: " + e.getMessage());
-        }
+    /**
+     * Returns the path to the currency file.
+     * @return Path to the currency file.
+     */
+    public String getCurrencyFile() {
+        return currencyFile;
     }
 
 
@@ -190,7 +264,7 @@ public class FileHandler {
      */
     private int generateIBAN() {
         int randomNum = (int) (Math.random() * 1000000000);
-        File myObj = new File(fileName);
+        File myObj = new File(checkingAccountFile);
         try (Scanner myReader = new Scanner(myObj)) {
             long lineNum = 0;
             while (myReader.hasNextLine()) {
