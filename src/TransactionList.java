@@ -1,6 +1,6 @@
 package src;
 
-/**
+/** 
  * TransactionList class represents a linked list of transactions. 
  * Each transaction is represented by a TransactionNode, which contains the transaction ID, amount, and references to the previous and next nodes in the list.
  * The TransactionList class provides methods to add transactions and convert the list to a 2D array for easier access.
