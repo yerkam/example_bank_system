@@ -1,7 +1,7 @@
 ```text
-data/
-├── Checking/
-│   ├── account.txt          (For checking accounts)
-│   └── transaction history/ (For transaction history)
-├── Deposit.txt              (For deposit accounts)
-└── Currency.txt             (For currency accounts)
+  data/ (hidden)
+  ├── Accounts/            -> per-user files ({id}.txt)
+  ├── TransactionHistory/  -> per-user transaction logs
+  ├── Credit Card/
+  │   └── CreditCards.txt
+  └── FrozenAccounts.txt
