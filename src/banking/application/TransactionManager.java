@@ -1,8 +1,9 @@
-package src;
+package banking.application;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import banking.domain.*;
 
 public class TransactionManager {
     private String filePath;

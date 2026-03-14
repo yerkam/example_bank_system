@@ -1,9 +1,11 @@
-package src;
+package banking.infrastructure;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import banking.domain.cards.Card;
 
 /**
  * Handles initialization of the folder structure for the banking system.
@@ -24,6 +26,7 @@ public class FileHandler {
     private final String creditCardFolderPath;
     private final String creditCardsFile;
     private final String frozenAccountsFile;
+    private final String loginDetailsFile;
     
     public FileHandler() {
         String folderName = "data";
@@ -36,6 +39,7 @@ public class FileHandler {
         this.creditCardFolderPath = dataFolderName + File.separator + "Credit Card";
         this.creditCardsFile = creditCardFolderPath + File.separator + "CreditCards.txt";
         this.frozenAccountsFile = dataFolderName + File.separator + "FrozenAccounts.txt";
+        this.loginDetailsFile = dataFolderName + File.separator + "LoginDetails.txt";
         initializeFolderStructure();
     }
 
@@ -77,6 +81,11 @@ public class FileHandler {
             if (!Files.exists(frozenAccountsPath)) {
                 Files.createFile(frozenAccountsPath);
             }
+            
+            Path loginDetailsPath = Paths.get(loginDetailsFile);
+            if (!Files.exists(loginDetailsPath)) {
+				Files.createFile(loginDetailsPath);
+			}
 
         } catch (Exception e) {
             System.out.println("An error occurred while initializing folder structure: " + e.getMessage());
@@ -97,5 +106,14 @@ public class FileHandler {
 
     public String getFrozenAccountsFile() {
         return frozenAccountsFile;
+    }
+    
+    public String getLoginDetailsFile() {
+		return loginDetailsFile;
+	}
+    
+    public void saveCard(Card card) {
+    	//This method will be used to save the card information to the appropriate file.
+    	
     }
 }
