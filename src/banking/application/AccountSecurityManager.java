@@ -1,4 +1,4 @@
-package src;
+package banking.application;
 
 import java.io.File;
 import java.io.FileWriter;

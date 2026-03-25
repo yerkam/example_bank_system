@@ -1,4 +1,4 @@
-package src;
+package banking.domain;
 
 /** 
  * TransactionList class represents a linked list of transactions. 
