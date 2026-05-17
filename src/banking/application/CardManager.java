@@ -1,18 +1,17 @@
 package banking.application;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 
-import banking.domain.cards.Card;
 import banking.domain.cards.CreditCard;
 import banking.domain.cards.DebitCard;
 import banking.infrastructure.AccountRepo;
 import banking.infrastructure.CardRepo;
+import banking.infrastructure.FileHandler;
 
 /**
  * Manages debit and credit card operations.
@@ -25,6 +24,7 @@ import banking.infrastructure.CardRepo;
  *   CreditCard#cardNumber#cvv#expiryDate#holderName#userId#creditLimit#availableLimit#debt#paymentDay
  */
 public class CardManager {
+    FileHandler fileHandler = new FileHandler();
     private final String accountsFolderPath;
     private final String creditCardsFile;
     private final AccountRepo accountRepo = new AccountRepo();

@@ -7,24 +7,22 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
 
+import banking.infrastructure.FileHandler;
+
 /**
  * Manages account security operations such as freezing and reactivating checking accounts.
  * Works with per-user account files in the Accounts folder.
  */
 public class AccountSecurityManager {
-    private final String accountsFolderPath;
-    private final String frozenAccountsFile;
-
-    public AccountSecurityManager(String accountsFolderPath, String frozenAccountsFile) {
-        this.accountsFolderPath = accountsFolderPath;
-        this.frozenAccountsFile = frozenAccountsFile;
-    }
+    static FileHandler fileHandler = new FileHandler();
+    private final static String accountsFolderPath = fileHandler.getAccountsFolderPath();
+    private final static String frozenAccountsFile = fileHandler.getFrozenAccountsFile();
 
     /**
      * Generates a random alphanumeric password for account reactivation.
      * @return A random alphanumeric password string of 12 characters.
      */
-    private String generateReactivationPassword() {
+    private static String generateReactivationPassword() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         SecureRandom secureRandom = new SecureRandom();
         StringBuilder password = new StringBuilder();
@@ -44,7 +42,7 @@ public class AccountSecurityManager {
      * @param accountNumber The checking account number to freeze.
      * @return The reactivation password, or null if the operation failed.
      */
-    public String freezeAccount(long userId, int accountNumber) {
+    public static String freezeAccount(long userId, int accountNumber) {
         try {
             String filePath = accountsFolderPath + File.separator + userId + ".txt";
             Path userPath = Paths.get(filePath);
@@ -177,4 +175,35 @@ public class AccountSecurityManager {
             return false;
         }
     }
+
+    public static void renewPassword(long ID, String newPassword){
+        try {
+            String filePath = accountsFolderPath + File.separator + ID + ".txt";
+            Path userPath = Paths.get(filePath);
+            if (!Files.exists(userPath)) {
+                System.out.println("User file does not exist.");
+                return;
+            }
+
+            java.util.List<String> lines = Files.readAllLines(userPath);
+            if (lines.isEmpty()) {
+                System.out.println("User file is empty.");
+                return;
+            }
+
+            String firstLine = lines.get(0).trim();
+            String[] parts = firstLine.split("#");
+            if (parts.length >= 3) {
+                parts[2] = banking.infrastructure.SecurityUtil.hashText(newPassword);
+                lines.set(0, String.join("#", parts));
+                Files.write(userPath, lines);
+                System.out.println("Password updated successfully for user ID: " + ID);
+            } else {
+                System.out.println("Invalid user file format. Password update failed.");
+            }
+        } catch (Exception e) {
+            System.out.println("An error occurred while updating the password: " + e.getMessage());
+        }
+    }
+
 }

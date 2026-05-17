@@ -1,6 +1,5 @@
 package banking.infrastructure;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -9,6 +9,8 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Scanner;
 
+import banking.infrastructure.FileHandler;
+
 /**
  * Manages account operations using per-user files.
  * Each user has their own file at data/Accounts/{id}.txt
@@ -23,19 +25,15 @@ import java.util.Scanner;
  */
 public class AccountManager {
 
-    private final String accountsFolderPath;
-
-    public AccountManager(String accountsFolderPath) {
-        this.accountsFolderPath = accountsFolderPath;
-    }
-
+    private static FileHandler fileHandler = new FileHandler();
+    private static String accountsFolderPath = fileHandler.getAccountsFolderPath();
 
     /**
      * Returns the file path for a specific user's account file.
      * @param id The user's ID.
      * @return The full path to the user's account file.
      */
-    private String getUserFilePath(long id) {
+    private static String getUserFilePath(long id) {
         return accountsFolderPath + File.separator + id + ".txt";
     }
 
@@ -49,12 +47,13 @@ public class AccountManager {
      * @param id       Client's ID
      * @param password Client's password
      */
-    private void ensureUserFile(String name, String surname, long id, int password) {
+    private static void ensureUserFile(String name, String surname, long id, String password) {
         String filePath = getUserFilePath(id);
         Path path = Paths.get(filePath);
+        String hashedPassword = banking.infrastructure.SecurityUtil.hashText(password);
         if (!Files.exists(path)) {
             try (FileWriter writer = new FileWriter(filePath)) {
-                writer.write(name + "#" + surname + "#" + password + "\n");
+                writer.write(name + "#" + surname + "#" + hashedPassword + "\n");
             } catch (Exception e) {
                 System.out.println("Error creating user file: " + e.getMessage());
             }
@@ -100,7 +99,7 @@ public class AccountManager {
      * @param accountType The account type to count.
      * @return The number of accounts of the specified type.
      */
-    public int getAccountTypeCount(long id, String accountType) {
+    public static int getAccountTypeCount(long id, String accountType) {
         String filePath = getUserFilePath(id);
         File file = new File(filePath);
         if (!file.exists()) return 0;
@@ -129,7 +128,7 @@ public class AccountManager {
      * @param id The user's ID.
      * @return true if the user file exists, false otherwise.
      */
-    public boolean isAccountExists(long id) {
+    public static boolean isAccountExists(long id) {
         return Files.exists(Paths.get(getUserFilePath(id)));
     }
 
@@ -141,7 +140,7 @@ public class AccountManager {
      * @param password Client's password
      * @return true if the account exists and the password matches, false otherwise.
      */
-    public boolean checkAccount(long id, int password) {
+    public static boolean checkAccount(long id, String password) {
         String filePath = getUserFilePath(id);
         File file = new File(filePath);
         if (!file.exists()) return false;
@@ -152,8 +151,8 @@ public class AccountManager {
                 if (!firstLine.isEmpty()) {
                     String[] parts = firstLine.split("#");
                     if (parts.length >= 3) {
-                        int storedPassword = Integer.parseInt(parts[2]);
-                        return storedPassword == password;
+                        String storedPassword = parts[2];
+                        return storedPassword.equals(banking.infrastructure.SecurityUtil.hashText(password));
                     }
                 }
             }
@@ -176,7 +175,7 @@ public class AccountManager {
      * @param balance  Client's account balance
      * @param active   Client's account status
      */
-    public void createCheckingAccount(String name, String surname, long id, int password, double balance, boolean active) {
+    public static void createCheckingAccount(String name, String surname, long id, String password, double balance, boolean active) {
         ensureUserFile(name, surname, id, password);
         int accountNumber = getAccountTypeCount(id, "Checking") + 1;
 
@@ -200,7 +199,7 @@ public class AccountManager {
      * @param balance  Client's account balance
      * @param months   Client's account duration in months
      */
-    public void createDepositAccount(String name, String surname, long id, int password, double balance, int months) {
+    public static void createDepositAccount(String name, String surname, long id, String password, double balance, int months) {
         ensureUserFile(name, surname, id, password);
         int accountNumber = getAccountTypeCount(id, "Deposit") + 1;
 
@@ -227,7 +226,7 @@ public class AccountManager {
      * @param balance  Client's account balance
      * @param currency Currency type (USD or EUR)
      */
-    public void createCurrencyAccount(String name, String surname, long id, int password, double balance, String currency) {
+    public static void createCurrencyAccount(String name, String surname, long id, String password, double balance, String currency) {
         // Currencies will be refactored
         if (!currency.equals("USD") && !currency.equals("EUR")) {
             System.out.println("Invalid currency type. Only USD and EUR are supported. Account creation failed.");
@@ -251,7 +250,7 @@ public class AccountManager {
      *
      * @return A unique IBAN number for the new account.
      */
-    private int generateIBAN() {
+    private static int generateIBAN() {
         int randomNum = (int) (Math.random() * 1000000000);
         File accountsFolder = new File(accountsFolderPath);
         File[] userFiles = accountsFolder.listFiles((dir, name) -> name.endsWith(".txt"));
@@ -280,4 +279,5 @@ public class AccountManager {
         }
         return randomNum;
     }
+
 }

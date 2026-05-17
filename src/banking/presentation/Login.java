@@ -1,12 +1,5 @@
 package banking.presentation;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.Scanner;
 
 /**
@@ -15,8 +8,6 @@ import java.util.Scanner;
  */
 public class Login {
 	
-	private final String loginDetailsFile;
-	
 	static Scanner scanner = new Scanner(System.in);
 	
 	/**
@@ -24,7 +15,6 @@ public class Login {
 	 * The user can choose to log in as a customer, bank employee, or bank manager, or exit the system.
 	 */
 	public Login(String loginDetailsFile) {
-		this.loginDetailsFile = loginDetailsFile;
 		System.out.println("Welcome to the Banking System!");
 		boolean loginChoice = false;
 		boolean personnelType = false; 
@@ -101,54 +91,56 @@ public class Login {
 	 */
 	public void loginProcess(String loginEntity) {
 		System.out.println("Welcome to the Banking System!");
-		System.out.println("Please enter your username and password to log in.");
+		System.out.println("Please enter your ID and password to log in.");
 		
-		System.out.println("Username: ");
-		String username = scanner.nextLine().trim();
+		System.out.println("ID: ");
+		long ID = Long.parseLong(scanner.nextLine().trim());
+
+		// Freeze account after 3 failed login attempts
+		int failedAttempts = 0;
+        boolean loggedIn = false;
 		
-		System.out.println("Password:");
-		String password = scanner.nextLine().trim();
+		String password = "";
+        while (failedAttempts < 3 && !loggedIn) {
+            System.out.println("Password (must be 6 digits):");
+            password = scanner.nextLine().trim();
+            // Is password exactly 6 digits? If so, break the loop
+            if (password.matches("\\d{6}")) {
+                break;
+            } else {
+                System.out.println("Invalid format! Password must be exactly 6 digits.");
+            }
+        }
 		
-		if (doesAccountExist(username, password)) {
-			System.out.println("Login successful! Welcome, " + username + "!");
-			// Proceed to the main menu or dashboard for the logged-in user
+		if (doesAccountExist(ID, password)) {
+			System.out.println("Login successful!");
+			loggedIn = true;
+            new banking.presentation.Menu(loginEntity);
 		} else {
-			System.out.println("Invalid username or password. Please try again.");
-			loginProcess(loginEntity); // Prompt again for login
+			failedAttempts++;
+			if(failedAttempts < 3) {
+				System.out.println("Login failed! Please try again.");
+			}else{
+				banking.application.AccountSecurityManager.freezeAccount(ID, 1);
+				System.out.println("You have entered the wrong password 3 times!");
+				System.out.println("For your security, your primary checking account has been frozen.");
+				System.out.println("Please contact bank personnel to reactivate it.");
+			}
 		}
-		
 	}
 	
 	/**
-	 * Checks if an account with the given username and password exists in the login details file.
-	 * @param username The username to check.
+	 * Checks if an account with the given ID and password exists in the login details file.
+	 * @param ID The user ID to check.
 	 * @param password The password to check.
 	 * @return true if the account exists, false otherwise.
 	 */
-	public boolean doesAccountExist(String username, String password) {
-        String filePath = loginDetailsFile;
-        File file = new File(filePath);
-        if (!file.exists()) return false;
-
-        try (Scanner reader = new Scanner(file)) {
-            while (reader.hasNextLine()) {
-                String line = reader.nextLine().trim();
-                if (line.isEmpty()) continue;
-                String[] parts = line.split("#");
-                if (parts[0].equals(username) && parts[1].equals(password)) {
-                    return true;
-                }
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println("Error reading user file: " + e.getMessage());
-        }
-        return false;
+	public boolean doesAccountExist(long ID, String password) {
+		return banking.application.AccountManager.checkAccount(ID, password);
     }
 	
-	
 	/**
-	 * Handles the account creation process by prompting the user for their details.
-	 * In a real implementation, this method would save the new account information to a file or database and allow the user to log in with their new credentials.
+	 * Handles the account creation process by prompting the user for their details and creating a new account using the AccountManager.
 	 */
 	public void createAccount() {
 		System.out.println("Welcome to the Banking System!");
@@ -160,25 +152,24 @@ public class Login {
 		System.out.println("Last Name: ");
 		String lastName = scanner.nextLine().trim();
 		
-		System.out.println("Username: ");
-		String username = scanner.nextLine().trim();
+		System.out.println("ID: ");
+		long ID = Long.parseLong(scanner.nextLine().trim());
 		
-		System.out.println("Password:");
-		String password = scanner.nextLine().trim();
-		
-		
-		String filePath = loginDetailsFile;
-        Path path = Paths.get(filePath);
-        if (!Files.exists(path)) {
-            try (FileWriter writer = new FileWriter(filePath)) {
-                writer.write(username + "#" + password + firstName + "#" + lastName + "#" + LocalDateTime.now() + "\n");
-                
-                System.out.println("Account created successfully! You can now log in with your credentials.");
-            } catch (Exception e) {
-                System.out.println("Error creating user file: " + e.getMessage());
+		String password = "";
+        while (true) {
+            System.out.println("Password (must be 6 digits):");
+            password = scanner.nextLine().trim();
+            // Şifre tam 6 rakamdan oluşuyorsa döngüden çık
+            if (password.matches("\\d{6}")) {
+                break;
+            } else {
+                System.out.println("Invalid format! Password must be exactly 6 digits.");
             }
         }
-		
-		
+
+		System.out.println("Balance you want to deposit: ");
+		double balance = Double.parseDouble(scanner.nextLine().trim());
+
+		banking.application.AccountManager.createCheckingAccount(firstName, lastName, ID, password, balance, true);
 	}	 
 }

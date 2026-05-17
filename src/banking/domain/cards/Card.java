@@ -38,9 +38,9 @@ public abstract class Card {
 		active = true;
 	}
 	
-//	public boolean isExpired() {
-////		return LocalDate.now().isAfter(expiryDate);
-//	}
+	public boolean isExpired() {
+		return LocalDate.now().isAfter(LocalDate.parse(expiryDate));
+	}
 	
 	public String getCardNumber() {
 		return cardNumber;

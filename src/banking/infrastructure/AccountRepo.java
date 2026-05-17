@@ -3,11 +3,11 @@ package banking.infrastructure;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class AccountRepo {
 
-	public int hasDebitCard(long userId, Path filePath, int accountNumber) {
+	
+    public int hasDebitCard(long userId, Path filePath, int accountNumber) {
 		int IBAN = 0;
 		try {
             java.util.List<String> lines = Files.readAllLines(filePath);
@@ -36,8 +36,6 @@ public class AccountRepo {
 		
 		return IBAN;
 	}
-	
-	
 	
 	/**
      * Checks if a card number already exists in debit cards (user files) or credit cards.

@@ -40,7 +40,6 @@ public class FileHandler {
         this.creditCardsFile = creditCardFolderPath + File.separator + "CreditCards.txt";
         this.frozenAccountsFile = dataFolderName + File.separator + "FrozenAccounts.txt";
         this.loginDetailsFile = dataFolderName + File.separator + "LoginDetails.txt";
-        initializeFolderStructure();
     }
 
     /**
@@ -111,9 +110,5 @@ public class FileHandler {
     public String getLoginDetailsFile() {
 		return loginDetailsFile;
 	}
-    
-    public void saveCard(Card card) {
-    	//This method will be used to save the card information to the appropriate file.
-    	
-    }
+
 }
