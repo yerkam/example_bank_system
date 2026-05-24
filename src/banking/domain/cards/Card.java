@@ -37,6 +37,10 @@ public abstract class Card {
 	public void activateCard() {
 		active = true;
 	}
+
+	public boolean isActive() {
+		return active;
+	}
 	
 	public boolean isExpired() {
 		return LocalDate.now().isAfter(LocalDate.parse(expiryDate));

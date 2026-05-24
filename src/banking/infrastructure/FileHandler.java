@@ -5,8 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import banking.domain.cards.Card;
-
 /**
  * Handles initialization of the folder structure for the banking system.
  * 
@@ -16,6 +14,8 @@ import banking.domain.cards.Card;
  *   +-- TransactionHistory/  - Per-user transaction history files
  *   +-- Credit Card/        - Credit card data
  *   |   +-- CreditCards.txt
+ *   +-- Loans/              - Loan records
+ *   |   +-- Loans.txt
  *   +-- FrozenAccounts.txt
  */
 public class FileHandler {
@@ -25,6 +25,8 @@ public class FileHandler {
     private final String transactionHistoryPath;
     private final String creditCardFolderPath;
     private final String creditCardsFile;
+    private final String loanFolderPath;
+    private final String loansFile;
     private final String frozenAccountsFile;
     private final String loginDetailsFile;
     
@@ -38,6 +40,8 @@ public class FileHandler {
         this.transactionHistoryPath = dataFolderName + File.separator + "TransactionHistory";
         this.creditCardFolderPath = dataFolderName + File.separator + "Credit Card";
         this.creditCardsFile = creditCardFolderPath + File.separator + "CreditCards.txt";
+        this.loanFolderPath = dataFolderName + File.separator + "Loans";
+        this.loansFile = loanFolderPath + File.separator + "Loans.txt";
         this.frozenAccountsFile = dataFolderName + File.separator + "FrozenAccounts.txt";
         this.loginDetailsFile = dataFolderName + File.separator + "LoginDetails.txt";
     }
@@ -71,9 +75,19 @@ public class FileHandler {
                 Files.createDirectory(creditCardPath);
             }
 
+            Path loanPath = Paths.get(loanFolderPath);
+            if (!Files.exists(loanPath)) {
+                Files.createDirectory(loanPath);
+            }
+
             Path creditCardsPath = Paths.get(creditCardsFile);
             if (!Files.exists(creditCardsPath)) {
                 Files.createFile(creditCardsPath);
+            }
+
+            Path loansPath = Paths.get(loansFile);
+            if (!Files.exists(loansPath)) {
+                Files.createFile(loansPath);
             }
 
             Path frozenAccountsPath = Paths.get(frozenAccountsFile);
@@ -101,6 +115,10 @@ public class FileHandler {
 
     public String getCreditCardsFile() {
         return creditCardsFile;
+    }
+
+    public String getLoansFile() {
+        return loansFile;
     }
 
     public String getFrozenAccountsFile() {

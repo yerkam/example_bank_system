@@ -1,17 +1,15 @@
 package banking.application;
 
+import banking.domain.cards.CreditCard;
+import banking.domain.cards.DebitCard;
+import banking.infrastructure.AccountRepo;
+import banking.infrastructure.CardRepo;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.time.LocalDate;
-
-import banking.domain.cards.CreditCard;
-import banking.domain.cards.DebitCard;
-import banking.infrastructure.AccountRepo;
-import banking.infrastructure.CardRepo;
-import banking.infrastructure.FileHandler;
 
 /**
  * Manages debit and credit card operations.
@@ -21,10 +19,9 @@ import banking.infrastructure.FileHandler;
  *   Checking#accountNum#balance#active#IBAN#cardNumber#cvv#cardExpiry#holderName
  * 
  * Credit cards are stored in a separate file (data/Credit Card/CreditCards.txt):
- *   CreditCard#cardNumber#cvv#expiryDate#holderName#userId#creditLimit#availableLimit#debt#paymentDay
+ *   CreditCard#cardNumber#cvv#expiryDate#active#holderName#userId#creditLimit#availableLimit#debt#paymentDay
  */
 public class CardManager {
-    FileHandler fileHandler = new FileHandler();
     private final String accountsFolderPath;
     private final String creditCardsFile;
     private final AccountRepo accountRepo = new AccountRepo();
@@ -183,6 +180,39 @@ public class CardManager {
 			System.out.println("An error occurred while creating the credit card. Card creation failed.");
 			return null;
 		}
+    }
+
+    /**
+     * Increases the credit limit for an existing credit card.
+     * Only managers are allowed to approve this operation.
+     *
+     * @param actorRole Role requesting the change (expected: manager).
+     * @param userId User whose card limit will be increased.
+     * @param amount Amount to add to the limit.
+     * @return true if the increase was applied, false otherwise.
+     */
+    public boolean increaseCreditLimit(String actorRole, long userId, double amount) {
+        if (actorRole == null || !actorRole.equalsIgnoreCase("manager")) {
+            System.out.println("Permission denied. Only managers can approve loan increases.");
+            return false;
+        }
+
+        if (amount <= 0) {
+            System.out.println("Invalid loan increase amount.");
+            return false;
+        }
+
+        CreditCard creditCard = cardRepo.findCreditCardByUserId(userId, creditCardsFile);
+        if (creditCard == null) {
+            System.out.println("Credit card not found for user ID " + userId + ".");
+            return false;
+        }
+
+        if (!creditCard.increaseCreditLimit(amount)) {
+            return false;
+        }
+
+        return cardRepo.updateCreditCard(creditCard, creditCardsFile);
     }
 
    

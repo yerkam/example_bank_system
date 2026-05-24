@@ -25,6 +25,7 @@ public class AccountRepo {
                         else {
 							IBAN = Integer.parseInt(parts[4]);
 						}
+                        break;
                     }
                 }
             }
@@ -36,6 +37,42 @@ public class AccountRepo {
 		
 		return IBAN;
 	}
+
+    public boolean adjustFirstActiveCheckingBalance(long userId, String accountsFolderPath, double amount) {
+        if (amount == 0) {
+            return true;
+        }
+
+        try {
+            File userFile = new File(accountsFolderPath + File.separator + userId + ".txt");
+            if (!userFile.exists()) {
+                System.out.println("User file not found while updating checking balance.");
+                return false;
+            }
+
+            java.util.List<String> lines = Files.readAllLines(userFile.toPath());
+            for (int i = 1; i < lines.size(); i++) {
+                String line = lines.get(i).trim();
+                if (line.isEmpty()) continue;
+
+                String[] parts = line.split("#");
+                if (parts.length >= 5 && parts[0].equals("Checking") && Boolean.parseBoolean(parts[3])) {
+                    double balance = Double.parseDouble(parts[2]);
+                    balance += amount;
+                    parts[2] = String.valueOf(balance);
+                    lines.set(i, String.join("#", parts));
+                    Files.write(userFile.toPath(), lines);
+                    return true;
+                }
+            }
+
+            System.out.println("No active checking account found for user " + userId + ".");
+        } catch (Exception e) {
+            System.out.println("An error occurred while updating checking balance: " + e.getMessage());
+        }
+
+        return false;
+    }
 	
 	/**
      * Checks if a card number already exists in debit cards (user files) or credit cards.
