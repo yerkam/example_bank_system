@@ -2,6 +2,11 @@ package banking.presentation;
 
 import java.util.Scanner;
 
+import banking.application.AccountManager;
+import banking.application.Authentication;
+import banking.application.utils.IBANGenerator;
+import banking.infrastructure.AccountRepository;
+
 /**
  * The login class handles user authentication and account creation for the banking system.
  * It provides a simple command-line interface for users to log in or create a new account.
@@ -9,16 +14,24 @@ import java.util.Scanner;
 public class Login {
 	
 	static Scanner scanner = new Scanner(System.in);
+	private AccountManager accountManager;
+	private Authentication authentication;
 	
 	/**
 	 * Displays the login menu and handles user input for logging in or creating a new account.
 	 * The user can choose to log in as a customer, bank employee, or bank manager, or exit the system.
 	 */
-	public Login(String loginDetailsFile) {
+	public Login(AccountManager accountManager, Authentication authentication) {
+		this.accountManager = accountManager;
+		this.authentication = authentication;
+		
 		System.out.println("Welcome to the Banking System!");
 		boolean loginChoice = false;
 		boolean personnelType = false; 
 		String loginEntity = "";
+		
+		
+		
 		
 		while(!personnelType) { 
 			System.out.println("Please select an option (A, B, C):");
@@ -136,7 +149,7 @@ public class Login {
 	 * @return true if the account exists, false otherwise.
 	 */
 	public boolean doesAccountExist(long ID, String password) {
-		return banking.application.AccountManager.checkAccount(ID, password);
+		return authentication.checkAccount(ID, password);
     }
 	
 	/**
@@ -170,6 +183,6 @@ public class Login {
 		System.out.println("Balance you want to deposit: ");
 		double balance = Double.parseDouble(scanner.nextLine().trim());
 
-		banking.application.AccountManager.createCheckingAccount(firstName, lastName, ID, password, balance, true);
+		accountManager.createCheckingAccount(firstName, lastName, ID, password, balance, true);
 	}	 
 }

@@ -19,6 +19,8 @@ import java.nio.file.Paths;
  *   +-- FrozenAccounts.txt
  */
 public class FileHandler {
+	
+	private static FileHandler instance;
 
     private final String dataFolderName;
     private final String accountsFolderPath;
@@ -44,6 +46,8 @@ public class FileHandler {
         this.loansFile = loanFolderPath + File.separator + "Loans.txt";
         this.frozenAccountsFile = dataFolderName + File.separator + "FrozenAccounts.txt";
         this.loginDetailsFile = dataFolderName + File.separator + "LoginDetails.txt";
+        
+        initializeFolderStructure();
     }
 
     /**
@@ -127,6 +131,13 @@ public class FileHandler {
     
     public String getLoginDetailsFile() {
 		return loginDetailsFile;
+	}
+    
+    public static FileHandler getInstance() {
+		if (instance == null) {
+			instance = new FileHandler();
+		}
+		return instance;
 	}
 
 }

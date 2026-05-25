@@ -11,7 +11,7 @@ public class SecurityUtil {
         char[] chars = text.toCharArray();
         for (char c : chars) {
             int i = (int) c;
-            i -= 15; // Simple encryption logic for demonstration purposes (not secure)
+            i += 15; // Simple encryption logic for demonstration purposes (not secure)
             hashedText += (char) i;
         }
         return hashedText;
