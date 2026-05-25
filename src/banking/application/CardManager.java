@@ -1,15 +1,13 @@
 package banking.application;
 
+import banking.application.factories.CardFactory;
+import banking.application.utils.CardGenerator;
 import banking.domain.cards.CreditCard;
 import banking.domain.cards.DebitCard;
-import banking.infrastructure.AccountRepo;
-import banking.infrastructure.CardRepo;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.SecureRandom;
-import java.time.LocalDate;
+import banking.infrastructure.AccountRepository;
+import banking.infrastructure.CardRepository;
+
+
 
 /**
  * Manages debit and credit card operations.
@@ -22,39 +20,103 @@ import java.time.LocalDate;
  *   CreditCard#cardNumber#cvv#expiryDate#active#holderName#userId#creditLimit#availableLimit#debt#paymentDay
  */
 public class CardManager {
-    private final String accountsFolderPath;
-    private final String creditCardsFile;
-    private final AccountRepo accountRepo = new AccountRepo();
-    private final CardRepo cardRepo = new CardRepo();
+	private CardRepository cardRepository;
+    private AccountRepository accountRepository;
+    private CardGenerator cardGenerator;;
+    
+    
+    
+    public CardManager(CardRepository cardRepository, AccountRepository accountRepository, CardGenerator cardGenerator) {
+    	this.cardRepository = cardRepository;
+		this.accountRepository = accountRepository;
+		this.cardGenerator = cardGenerator;
+	}
+    
+    
+  /**
+  * Creates a credit card. Stored in the Credit Card folder.
+  *
+  * @param userId      The user's ID.
+  * @param holderName  The name of the cardholder.
+  * @param creditLimit The credit limit for the card.
+  * @param paymentDay  The day of the month for payment (1-28).
+  * @return The generated card number, or null if creation failed.
+  */
+	public String createCreditCard(long userId, String holderName, double creditLimit, int paymentDay) {
+	
+	    if (paymentDay < 1 || paymentDay > 28) {
+	        System.out.println("Invalid payment day.");
+	        return null;
+	    }
+	
+	    if (cardRepository.isCreditCardExists(userId)) {
+	        System.out.println("Credit card already exists.");
+	        return null;
+	    }
+	
+	    String cardNumber;
 
-    public CardManager(String accountsFolderPath, String creditCardsFile) {
-        this.accountsFolderPath = accountsFolderPath;
-        this.creditCardsFile = creditCardsFile;
-    }
+	    do {
+	        cardNumber = cardGenerator.generateCardNumber();
+	    }
+	    while (isCardNumberExists(cardNumber));
+	    
+	    String cvv = cardGenerator.generateCVV();
+	    String expiryDate = cardGenerator.generateExpiryDate();
+	
+	    CreditCard card = CardFactory.createCreditCard(cardNumber, cvv, expiryDate, holderName,
+	            userId, creditLimit, paymentDay);
+	
+	    boolean saved = cardRepository.saveCreditCard(card);
+	    if (saved) {
+	    	return cardNumber;
+	    }
+	    else {
+			System.out.println("An error occurred while creating the credit card. Card creation failed.");
+			return null;
+		}
+	}
+    
+    
+  /**
+  * Creates a debit card linked to a specific checking account.
+  * The card info is appended to the checking account line in the user's file.
+  *
+  * @param userId        The user's ID.
+  * @param accountNumber The checking account number to link the card to.
+  * @param holderName    The name of the cardholder.
+  * @return The generated card number, or null if creation failed.
+  */
+    public String createDebitCard(long userId, int accountNumber, String holderName) {
 
-    /**
-     * Generates a unique 16-digit card number.
-     * @return A unique 16-digit card number as a String.
-     */
-    private String generateCardNumber() {
-        SecureRandom random = new SecureRandom();
-        StringBuilder cardNumber = new StringBuilder();
-        
-        // Generate 16 digits
-        for (int i = 0; i < 16; i++) {
-            cardNumber.append(random.nextInt(10));
+        int iban = accountRepository.hasDebitCardIBAN(userId, accountNumber);
+
+        if (iban == 0) {
+            System.out.println("Debit card already exists.");
+            return null;
         }
-        
-        String generatedNumber = cardNumber.toString();
-        
-        // Check if the card number already exists in debit or credit cards
-        if (isCardNumberExists(generatedNumber)) {
-            return generateCardNumber(); // Recursively generate a new number
-        }
-        
-        return generatedNumber;
-    }
 
+        String cardNumber;
+
+	    do {
+	        cardNumber = cardGenerator.generateCardNumber();
+	    }
+	    while (isCardNumberExists(cardNumber));
+
+        DebitCard card = CardFactory.createDebitCard(cardNumber, cardGenerator.generateCVV(), cardGenerator.generateExpiryDate(),
+                holderName, iban);
+
+        boolean saved = cardRepository.saveDebitCard(card, userId, accountNumber);
+
+        if (saved) {
+			return cardNumber;
+		}
+		else {
+			System.out.println("An error occurred while creating the debit card. Card creation failed.");
+			return null;
+		}
+    }
+    
     /**
      * Checks if a card number already exists in debit cards (user files) or credit cards.
      * @param cardNumber The card number to check.
@@ -62,10 +124,10 @@ public class CardManager {
      */
     private boolean isCardNumberExists(String cardNumber) {
     	// Check in debit cards (user files)
-    	boolean debit = accountRepo.isCardNumberExistsDebit(cardNumber, accountsFolderPath);
+    	boolean debit = cardRepository.isCardNumberExistsDebit(cardNumber);
     	
     	// Check in credit cards
-    	boolean credit = cardRepo.isCardNumberExistsCredit(cardNumber, creditCardsFile);
+    	boolean credit = cardRepository.isCardNumberExistsCredit(cardNumber);
     	
     	if(debit || credit) {
     		return true;
@@ -74,147 +136,6 @@ public class CardManager {
     		return false;
     	}
     	
-    }
-
-    /**
-     * Generates a random 3-digit CVV number.
-     * @return A 3-digit CVV as a String.
-     */
-    private String generateCVV() {
-        SecureRandom random = new SecureRandom();
-        int cvv = random.nextInt(1000); // Range: 000-999
-        return String.format("%03d", cvv); // Format as 3 digits with leading zeros if necessary
-    }
-
-
-    /**
-     * Generates an expiry date for a card (5 years from now).
-     * @return Expiry date in MM/YY format.
-     */
-    private String generateExpiryDate() {
-        LocalDate now = LocalDate.now();
-        LocalDate expiryDate = now.plusYears(5);
-        int month = expiryDate.getMonthValue();
-        int year = expiryDate.getYear() % 100; // Last 2 digits of year
-        return String.format("%02d/%02d", month, year);
-    }
-
-
-    /**
-     * Creates a debit card linked to a specific checking account.
-     * The card info is appended to the checking account line in the user's file.
-     *
-     * @param userId        The user's ID.
-     * @param accountNumber The checking account number to link the card to.
-     * @param holderName    The name of the cardholder.
-     * @return The generated card number, or null if creation failed.
-     */
-    public String createDebitCard(long userId, int accountNumber, String holderName) {
-        String filePath = accountsFolderPath + File.separator + userId + ".txt";
-        Path path = Paths.get(filePath);
-        if (!Files.exists(path)) {
-            System.out.println("User file not found. Card creation failed.");
-            return null;
-        }
-        
-        int IBAN = accountRepo.hasDebitCard(userId, path, accountNumber);
-        if (IBAN == 0) {
-			System.out.println("This checking account already has a debit card. Card creation failed.");
-			return null;
-		}
-        else {
-        	String generatedCardNumber = null;
-        	generatedCardNumber = generateCardNumber();
-            String cvv = generateCVV();
-            String expiryDate = generateExpiryDate();
-            
-            DebitCard newCard = new DebitCard(generatedCardNumber, cvv, expiryDate, true, holderName, IBAN);
-            
-            
-            if (cardRepo.saveDebitCard(newCard, path, accountNumber)) {
-				return generatedCardNumber;
-			}
-			else {
-				System.out.println("An error occurred while creating the debit card. Card creation failed.");
-				return null;
-			}
-        }
-    }
-
-
-
-    /**
-     * Creates a credit card. Stored in the Credit Card folder.
-     *
-     * @param userId      The user's ID.
-     * @param holderName  The name of the cardholder.
-     * @param creditLimit The credit limit for the card.
-     * @param paymentDay  The day of the month for payment (1-28).
-     * @return The generated card number, or null if creation failed.
-     */
-    public String createCreditCard(long userId, String holderName, double creditLimit, int paymentDay) {
-        if (paymentDay < 1 || paymentDay > 28) {
-            System.out.println("Invalid payment day. Must be between 1 and 28. Card creation failed.");
-            return null;
-        }
-
-        if (cardRepo.isCreditCardExists(userId, creditCardsFile)) {
-            System.out.println("A credit card already exists for user ID " + userId + ". Card creation failed.");
-            return null;
-        }
-        
-        String cardNumber = generateCardNumber();
-        String cvv = generateCVV();
-        String expiryDate = generateExpiryDate();
-        double availableLimit = creditLimit;
-        double debt = 0.0;
-        
-        
-        CreditCard newCard = new CreditCard(cardNumber, cvv, expiryDate, true, holderName, userId, creditLimit, availableLimit, debt, paymentDay);
-        
-
-        if (cardRepo.saveCreditCard(newCard, creditCardsFile)) {
-        	return cardNumber;
-        }
-        else {
-			System.out.println("An error occurred while creating the credit card. Card creation failed.");
-			return null;
-		}
-    }
-
-    /**
-     * Increases the credit limit for an existing credit card.
-     * Only managers are allowed to approve this operation.
-     *
-     * @param actorRole Role requesting the change (expected: manager).
-     * @param userId User whose card limit will be increased.
-     * @param amount Amount to add to the limit.
-     * @return true if the increase was applied, false otherwise.
-     */
-    public boolean increaseCreditLimit(String actorRole, long userId, double amount) {
-        if (actorRole == null || !actorRole.equalsIgnoreCase("manager")) {
-            System.out.println("Permission denied. Only managers can approve loan increases.");
-            return false;
-        }
-
-        if (amount <= 0) {
-            System.out.println("Invalid loan increase amount.");
-            return false;
-        }
-
-        CreditCard creditCard = cardRepo.findCreditCardByUserId(userId, creditCardsFile);
-        if (creditCard == null) {
-            System.out.println("Credit card not found for user ID " + userId + ".");
-            return false;
-        }
-
-        if (!creditCard.increaseCreditLimit(amount)) {
-            return false;
-        }
-
-        return cardRepo.updateCreditCard(creditCard, creditCardsFile);
-    }
-
-   
+    }   
 
 }

@@ -14,10 +14,18 @@ import banking.domain.accounts.CheckingAccount;
 import banking.domain.accounts.CurrencyAccount;
 import banking.domain.accounts.DepositAccount;
 
+
+/**
+ * The FileAccountRepository class implements the AccountRepository interface and provides file-based storage for user accounts.
+ * It manages user account files, allowing for the creation, retrieval, and updating of account information.
+ */
 public class FileAccountRepository implements AccountRepository {
 	
+	// Singleton instance of FileHandler to manage file paths and operations
 	private final FileHandler fileHandler = FileHandler.getInstance();
     private String accountsFolderPath = fileHandler.getAccountsFolderPath();
+    
+    
     /**
      * Returns the file path for a specific user's account file.
      * @param id The user's ID.
@@ -57,11 +65,19 @@ public class FileAccountRepository implements AccountRepository {
         return count;
 	}
 		
-	// Name should be changed...
-	public int hasDebitCardIBAN(long userId, Path filePath, int accountNumber) {
+	/**
+	 * Checks if a debit card IBAN exists for a given user and account number.
+	 *
+	 * @param userId        The user's ID.
+	 * @param accountNumber The account number to check.
+	 * @return The IBAN if it exists, or 0 if it does not.
+	 */
+	public int hasDebitCardIBAN(long userId, int accountNumber) {
+		String filePath = accountsFolderPath + File.separator + userId + ".txt";
+        Path path = Paths.get(filePath);
 		int IBAN = 0;
 		try {
-            java.util.List<String> lines = Files.readAllLines(filePath);
+            java.util.List<String> lines = Files.readAllLines(path);
             
             for (int i = 0; i < lines.size(); i++) {
                 String line = lines.get(i).trim();
@@ -89,6 +105,15 @@ public class FileAccountRepository implements AccountRepository {
 		return IBAN;
 	}
 
+	
+	/**
+	 * Adjusts the balance of the first active checking account for a user by a specified amount.
+	 *
+	 * @param userId             The user's ID.
+	 * @param accountsFolderPath The path to the accounts folder.
+	 * @param amount             The amount to adjust (positive to increase, negative to decrease).
+	 * @return true if the balance was successfully adjusted, false otherwise.
+	 */
     public boolean adjustFirstActiveCheckingBalance(long userId, String accountsFolderPath, double amount) {
         if (amount == 0) {
             return true;
@@ -125,35 +150,14 @@ public class FileAccountRepository implements AccountRepository {
         return false;
     }
 		
-	/** SHOULD BE MOVED TO CARD REPOSITORY
-     * Checks if a card number already exists in debit cards (user files) or credit cards.
-     * @param cardNumber The card number to check.
-     * @return true if the card number exists, false otherwise.
-     */
-    public boolean isCardNumberExistsDebit(String cardNumber, String accountsFolderPath) {
-        try {
-            // Check in user account files (debit cards are in Checking lines)
-            File accountsFolder = new File(accountsFolderPath);
-            File[] userFiles = accountsFolder.listFiles((dir, name) -> name.endsWith(".txt"));
-            if (userFiles != null) {
-                for (File userFile : userFiles) {
-                    for (String line : Files.readAllLines(userFile.toPath())) {
-                        if (line.trim().isEmpty()) continue;
-                        String[] parts = line.split("#");
-                        // Checking with debit card: Checking#num#balance#active#IBAN#cardNumber#...
-                        if (parts[0].equals("Checking") && parts.length >= 6 && parts[5].equals(cardNumber)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Error checking card number in the account folder path: " + e.getMessage());
-        }
-        return false;
-    }
-
-	@Override
+	
+    /**
+	 * Saves a checking account for a user. If the user's file does not exist, it creates one with the user's info.
+	 * The account information is appended to the user's file.
+	 *
+	 * @param userId  The user's ID.
+	 * @param account The checking account to save.
+	 */
 	public void saveCheckingAccount(long userId, CheckingAccount account) {
 		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());
 
@@ -165,7 +169,14 @@ public class FileAccountRepository implements AccountRepository {
 		
 	}
 
-	@Override
+
+	/**
+	 * Saves a deposit account for a user. If the user's file does not exist, it creates one with the user's info.
+	 * The account information is appended to the user's file.
+	 *
+	 * @param userId  The user's ID.
+	 * @param account The deposit account to save.
+	 */
 	public void saveDepositAccount(long userId, DepositAccount account) {
 		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());
 
@@ -179,7 +190,14 @@ public class FileAccountRepository implements AccountRepository {
 		
 	}
 
-	@Override
+	
+	/**
+	 * Saves a currency account for a user. If the user's file does not exist, it creates one with the user's info.
+	 * The account information is appended to the user's file.
+	 *
+	 * @param userId  The user's ID.
+	 * @param account The currency account to save.
+	 */
 	public void saveCurrencyAccount(long userId, CurrencyAccount account) {
 
 		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());

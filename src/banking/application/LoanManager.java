@@ -1,7 +1,8 @@
 package banking.application;
 
 import banking.domain.loans.Loan;
-import banking.infrastructure.AccountRepo;
+import banking.infrastructure.AccountRepository;
+import banking.infrastructure.FileAccountRepository;
 import banking.infrastructure.LoanRepo;
 import java.time.LocalDateTime;
 
@@ -11,7 +12,7 @@ public class LoanManager {
 	private final String loansFile;
 	private final CreditScoreManager creditScoreManager;
 	private final LoanRepo loanRepo = new LoanRepo();
-	private final AccountRepo accountRepo = new AccountRepo();
+	private final AccountRepository accountRepo = new FileAccountRepository();
 
 	public LoanManager(String accountsFolderPath, String creditCardsFile, String loansFile) {
 		this.accountsFolderPath = accountsFolderPath;
