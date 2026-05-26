@@ -6,6 +6,11 @@ import banking.application.AccountManager;
 import banking.application.Authentication;
 import banking.application.utils.IBANGenerator;
 import banking.infrastructure.AccountRepository;
+import banking.presentation.menu.CustomerRoleStrategy;
+import banking.presentation.menu.EmployeeRoleStrategy;
+import banking.presentation.menu.ManagerRoleStrategy;
+import banking.presentation.menu.RoleContext;
+import banking.presentation.menu.RoleStrategy;
 
 /**
  * The login class handles user authentication and account creation for the banking system.
@@ -128,7 +133,26 @@ public class Login {
 		if (doesAccountExist(ID, password)) {
 			System.out.println("Login successful!");
 			loggedIn = true;
-            new banking.presentation.Menu(loginEntity);
+			
+			RoleStrategy roleStrategy;
+			switch (loginEntity) {
+				case "customer":
+					roleStrategy = new CustomerRoleStrategy();
+					break;
+				case "employee":
+					roleStrategy = new EmployeeRoleStrategy();
+					break;
+				case "manager":
+					roleStrategy = new ManagerRoleStrategy();
+					break;
+				default:
+					System.out.println("Invalid login entity. Exiting.");
+					System.exit(0);
+					return; // This return is just to satisfy the compiler, it will never be reached.
+			}
+			RoleContext roleContext = new RoleContext(roleStrategy);
+			roleContext.showMenu();
+			
 		} else {
 			failedAttempts++;
 			if(failedAttempts < 3) {
