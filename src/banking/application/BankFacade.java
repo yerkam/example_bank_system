@@ -1,5 +1,6 @@
 package banking.application;
 
+
 public class BankFacade {
 	
 	private AccountManager accountManager;
@@ -29,6 +30,10 @@ public class BankFacade {
 		accountManager.createCurrencyAccount(name, surname, id, password, balance, currency);
 	}
 	
+	public long generateID(String role) {
+		return accountManager.generateID(role);
+	}
+	
 	
 	// Card Creation Methods
 	public void createCreditCard(long userId, String holderName, double creditLimit, int paymentDay) {
@@ -45,14 +50,20 @@ public class BankFacade {
 	 * @param password The password to check.
 	 * @return true if the account exists, false otherwise.
 	 */
-	public boolean doesAccountExist(long ID, String password) {
-		return authentication.checkAccount(ID, password);
+	public boolean doesAccountExist(long ID, String password, String role) {
+		return authentication.login(ID, password, role);
 	}
 	
 	// Account Security Methods
 	public void freezeAccount(long ID, int durationInDays) {
 		accountSecurityManager.freezeAccount(ID, durationInDays);
 	}
+	
+	public void createEmployeeAccount(String name, String surname, long id, String password) {
+		accountManager.createEmployeeAccount(name, surname, id, password);
+	}
+	
+	
 	
 
 }

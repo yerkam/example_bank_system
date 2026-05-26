@@ -4,8 +4,8 @@ public class CheckingAccount extends Account {
 	private boolean active;
     private int iban;
 
-    public CheckingAccount(int accountNumber, double balance, boolean active, int iban, String name, String surname, String password, long id) {
-        super(accountNumber, balance, name, surname, password, id);
+    public CheckingAccount(int accountNumber, double balance, boolean active, int iban, long id) {
+        super(accountNumber, balance, id);
         this.active = active;
         this.iban = iban;
     }

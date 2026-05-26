@@ -27,8 +27,12 @@ public class EmployeeRoleStrategy implements RoleStrategy {
 			System.out.println(" -- 'CC'      : Enter the letter 'CC' to Create a new checking account for the customer...");
 			System.out.println(" -- 'CD'      : Enter the letter 'CD' to Create a new deposit account for the customer...");
 			System.out.println(" -- 'CCU'     : Enter the letter 'CCU' to Create a new currency account for the customer...");
+			System.out.println(" -- 'EXIT'    : Enter the letters 'EXIT' to Exit the program...");
+			System.out.println("-------------------------------------------------------------------------------------------------");
+			
 			//We can add more functionalities to the EMPLOYEE menu as needed...
 			
+			System.out.print(" - Your choice: ");
 			String choice = scanner.nextLine().trim().toUpperCase();
 			
 			//Add functions for each case as needed...

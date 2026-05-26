@@ -33,7 +33,7 @@ public class FileAccountRepository implements AccountRepository {
      */
     private String getUserFilePath(long id) {
         return accountsFolderPath + File.separator + id + ".txt";
-    }
+    } 
 	
 
     /**
@@ -159,7 +159,7 @@ public class FileAccountRepository implements AccountRepository {
 	 * @param account The checking account to save.
 	 */
 	public void saveCheckingAccount(long userId, CheckingAccount account) {
-		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());
+//		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());
 
         try (FileWriter writer = new FileWriter(getUserFilePath(account.getId()), true)) {
             writer.write("Checking#" + account.getAccountNumber() + "#" + account.getBalance() + "#" + account.isActive() + "#" + account.getIban() + "\n");
@@ -178,7 +178,7 @@ public class FileAccountRepository implements AccountRepository {
 	 * @param account The deposit account to save.
 	 */
 	public void saveDepositAccount(long userId, DepositAccount account) {
-		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());
+//		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());
 
         try (FileWriter writer = new FileWriter(getUserFilePath(account.getId()), true)) {
             LocalDate date = LocalDate.now();
@@ -200,7 +200,7 @@ public class FileAccountRepository implements AccountRepository {
 	 */
 	public void saveCurrencyAccount(long userId, CurrencyAccount account) {
 
-		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());
+//		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());
 
         try (FileWriter writer = new FileWriter(getUserFilePath(account.getId()), true)) {
             writer.write("Currency#" + account.getAccountNumber() + "#" + account.getBalance() + "#" + account.getCurrency() + "\n");
@@ -211,25 +211,25 @@ public class FileAccountRepository implements AccountRepository {
 	}
 
 		
-	/**
-     * Ensures the user file exists. If not, creates it with user info on the first line.
-     * If the file already exists, does nothing.
-     *
-     * @param name     Client's name
-     * @param surname  Client's surname
-     * @param id       Client's ID
-     * @param password Client's password
-     */
-    public void ensureUserFile(String name, String surname, long id, String password) {
-        String filePath = getUserFilePath(id);
-        Path path = Paths.get(filePath);
-        String hashedPassword = banking.infrastructure.SecurityUtil.hashText(password);
-        if (!Files.exists(path)) {
-            try (FileWriter writer = new FileWriter(filePath)) {
-                writer.write(name + "#" + surname + "#" + hashedPassword + "\n");
-            } catch (Exception e) {
-                System.out.println("Error creating user file: " + e.getMessage());
-            }
-        }
-    }
+//	/**
+//     * Ensures the user file exists. If not, creates it with user info on the first line.
+//     * If the file already exists, does nothing.
+//     *
+//     * @param name     Client's name
+//     * @param surname  Client's surname
+//     * @param id       Client's ID
+//     * @param password Client's password
+//     */
+//    public void ensureUserFile(String name, String surname, long id, String password) {
+//        String filePath = getUserFilePath(id);
+//        Path path = Paths.get(filePath);
+//        String hashedPassword = banking.infrastructure.SecurityUtil.hashText(password);
+//        if (!Files.exists(path)) {
+//            try (FileWriter writer = new FileWriter(filePath)) {
+//                writer.write(name + "#" + surname + "#" + hashedPassword + "\n");
+//            } catch (Exception e) {
+//                System.out.println("Error creating user file: " + e.getMessage());
+//            }
+//        }
+//    }
 }

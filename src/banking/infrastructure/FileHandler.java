@@ -29,6 +29,10 @@ public class FileHandler {
     private final String creditCardsFile;
     private final String loanFolderPath;
     private final String loansFile;
+    private final String usersFolderPath;
+    private final String customersFile;
+    private final String employeesFile;
+    private final String managersFile;
     private final String frozenAccountsFile;
     private final String loginDetailsFile;
     
@@ -44,6 +48,10 @@ public class FileHandler {
         this.creditCardsFile = creditCardFolderPath + File.separator + "CreditCards.txt";
         this.loanFolderPath = dataFolderName + File.separator + "Loans";
         this.loansFile = loanFolderPath + File.separator + "Loans.txt";
+        this.usersFolderPath = dataFolderName + File.separator + "Users";
+        this.customersFile = usersFolderPath + File.separator + "Customers.txt";
+        this.employeesFile = usersFolderPath + File.separator + "Employees.txt";
+        this.managersFile = usersFolderPath + File.separator + "Managers.txt";
         this.frozenAccountsFile = dataFolderName + File.separator + "FrozenAccounts.txt";
         this.loginDetailsFile = dataFolderName + File.separator + "LoginDetails.txt";
         
@@ -83,6 +91,26 @@ public class FileHandler {
             if (!Files.exists(loanPath)) {
                 Files.createDirectory(loanPath);
             }
+            
+            Path userPath = Paths.get(usersFolderPath);
+            if (!Files.exists(userPath)) {
+                Files.createDirectory(userPath);
+            }
+            
+            Path customersPath = Paths.get(customersFile);
+            if (!Files.exists(customersPath)) {
+                Files.createFile(customersPath);
+            }
+            
+            Path employeesPath = Paths.get(employeesFile);
+            if (!Files.exists(employeesPath)) {
+                Files.createFile(employeesPath);
+            }
+            
+            Path managersPath = Paths.get(managersFile);
+            if (!Files.exists(managersPath)) {
+                Files.createFile(managersPath);
+            }
 
             Path creditCardsPath = Paths.get(creditCardsFile);
             if (!Files.exists(creditCardsPath)) {
@@ -119,6 +147,22 @@ public class FileHandler {
 
     public String getCreditCardsFile() {
         return creditCardsFile;
+    }
+    
+    public String getUsersFolderPath() {
+        return usersFolderPath;
+    }
+    
+    public String getCustomersFile() {
+        return customersFile;
+    }
+    
+    public String getEmployeesFile() {
+        return employeesFile;
+    }
+    
+    public String getManagersFile() {
+        return managersFile;
     }
 
     public String getLoansFile() {

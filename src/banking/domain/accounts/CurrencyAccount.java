@@ -4,9 +4,9 @@ public class CurrencyAccount extends Account {
 
     private String currency;
 
-    public CurrencyAccount(int accountNumber, double balance, String currency, String name, String surname, String password, long id) {
+    public CurrencyAccount(int accountNumber, double balance, String currency, long id) {
 
-        super(accountNumber, balance, name, surname, password, id);
+        super(accountNumber, balance, id);
         this.currency = currency;
     }
 

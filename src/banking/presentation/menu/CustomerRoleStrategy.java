@@ -32,9 +32,11 @@ public class CustomerRoleStrategy implements RoleStrategy {
 			System.out.println(" -- 'TL'      : Enter the letters 'TL' to Take loans...");
 			System.out.println(" -- 'RSP'     : Enter the letters 'RSP' to Reset Password...");
 			System.out.println(" -- 'EXIT'    : Enter the letters 'EXIT' to Exit the program...");
+			System.out.println("-------------------------------------------------------------------------------------------------");
 			
 			//We can add more functionalities to the CUSTOMER menu as needed...
 			
+			System.out.print(" - Your choice: ");
 			String choice = scanner.nextLine().trim().toUpperCase();
 			
 			//Add functions for each case as needed...

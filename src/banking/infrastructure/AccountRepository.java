@@ -14,7 +14,7 @@ import banking.domain.accounts.DepositAccount;
 public interface AccountRepository {
 
 	// Ensures that a user file exists for the given user details. If the file does not exist, it creates one.
-	void ensureUserFile(String name, String surname, long id, String password);
+//	void ensureUserFile(String name, String surname, long id, String password);
 
 	
     int getAccountTypeCount(long userId, String accountType);

@@ -137,7 +137,7 @@ public class Login {
 			String password = "";
 			while(!validPassword) {
 				System.out.println("---------------------------------------------------------");
-				System.out.println("Password (must be 6 digits):");
+				System.out.print("Password (must be 6 digits): ");
 				password = scanner.nextLine().trim();
 				if (password.matches("\\d{6}")) {
 					validPassword = true;
@@ -149,7 +149,7 @@ public class Login {
 			
 			
 			if (password.matches("\\d{6}")) {
-            	if (bankFacade.doesAccountExist(ID, password)) {
+            	if (bankFacade.doesAccountExist(ID, password, loginEntity.toUpperCase())) {
         			System.out.println("Login successful!");
         			loggedIn = true;
         			

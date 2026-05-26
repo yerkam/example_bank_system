@@ -45,17 +45,9 @@ public class AccountCreationHandler {
 			}
 		}
 		
-		validInput = false;
-		while(!validInput) {
-			try {
-				System.out.println("---------------------------------------------------------");
-				System.out.print("Account ID: ");
-				ID = Long.parseLong(scanner.nextLine().trim());
-				validInput = true;
-			} catch (NumberFormatException e) {
-				System.out.println("Invalid ID format! Account ID must be a number.");
-			}
-		}
+		System.out.println("---------------------------------------------------------");
+		ID = bankFacade.generateID("CUSTOMER");
+		System.out.println("Generated Checking Account ID: " + ID);
 		
 		validInput = false;
 		while(!validInput) {
@@ -125,17 +117,9 @@ public class AccountCreationHandler {
 			}
 		}
 		
-		validInput = false;
-		while(!validInput) {
-			try {
-				System.out.println("---------------------------------------------------------");
-				System.out.print("Account ID: ");
-				ID = Long.parseLong(scanner.nextLine().trim());
-				validInput = true;
-			} catch (NumberFormatException e) {
-				System.out.println("Invalid ID format! Account ID must be a number.");
-			}
-		}
+		System.out.println("---------------------------------------------------------");
+		ID = bankFacade.generateID("CUSTOMER");
+		System.out.println("Generated Deposit Account ID: " + ID);
 		
 		validInput = false;
 		while(!validInput) {
@@ -222,17 +206,9 @@ public class AccountCreationHandler {
 			}
 		}
 		
-		validInput = false;
-		while(!validInput) {
-			try {
-				System.out.println("---------------------------------------------------------");
-				System.out.print("Account ID: ");
-				ID = Long.parseLong(scanner.nextLine().trim());
-				validInput = true;
-			} catch (NumberFormatException e) {
-				System.out.println("Invalid ID format! Account ID must be a number.");
-			}
-		}
+		System.out.println("---------------------------------------------------------");
+		ID = bankFacade.generateID("CUSTOMER");
+		System.out.println("Generated Currency Account ID: " + ID);
 		
 		validInput = false;
 		while(!validInput) {
@@ -280,6 +256,62 @@ public class AccountCreationHandler {
 		
 		bankFacade.createCurrencyAccount(firstName, lastName, ID, password, balance, currency);
 	}
+	
+	
+	/**
+	 * Handles the EMPLOYEE account creation process by prompting the MANAGER for their employee's details and 
+	 * creating a new EMPLOYEE account using the User Factory.
+	 */
+	public void createEmployeeAccount() {
+		boolean validInput = false; String firstName = ""; String lastName = ""; long ID = 0; String password = ""; double balance = 0.0;
+		String currency = "";
+		System.out.println("Please enter your details to create a new account.");
+		
+		while (!validInput) {
+			System.out.println("--------------------------");
+			System.out.print("Employee's First Name: ");
+			firstName = scanner.nextLine().trim();
+			if (firstName.isEmpty()) {
+				System.out.println("EMployee's First name cannot be empty. Please try again.");
+			}
+			else {
+				validInput = true;
+			}
+		}
+		
+		validInput = false;
+		while (!validInput) {
+			System.out.println("--------------------------");
+			System.out.print("EMployee's Last Name: ");
+			lastName = scanner.nextLine().trim();
+			if (lastName.isEmpty()) {
+				System.out.println("EMployee's Last name cannot be empty. Please try again.");
+			}
+			else {
+				validInput = true;
+			}
+		}
+		
+		System.out.println("---------------------------------------------------------");
+		ID = bankFacade.generateID("EMPLOYEE");
+		System.out.println("Generated EMPLOYEE Account ID: " + ID);
+		
+		validInput = false;
+		while(!validInput) {
+			System.out.println("---------------------------------------------------------");
+			System.out.print("Account Password (must be 6 digits): ");
+            password = scanner.nextLine().trim();
+            // Şifre tam 6 rakamdan oluşuyorsa döngüden çık
+            if (password.matches("\\d{6}")) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid format! Account Password must be exactly 6 digits.");
+            }
+		}
+		
+		bankFacade.createEmployeeAccount(firstName, lastName, ID, password);
+	}
+	
 	
 	
 }

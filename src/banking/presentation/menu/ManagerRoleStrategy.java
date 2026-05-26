@@ -27,8 +27,12 @@ public class ManagerRoleStrategy implements RoleStrategy {
 			System.out.println(" -- 'CD'      : Enter the letter 'CD' to Create a new deposit account for the customer...");
 			System.out.println(" -- 'CCU'     : Enter the letter 'CCU' to Create a new currency account for the customer...");
 			System.out.println(" -- 'CEA'     : Enter the letter 'CEA' to Create a new employee account...");
+			System.out.println(" -- 'EXIT'    : Enter the letters 'EXIT' to Exit the program...");
+			System.out.println("-------------------------------------------------------------------------------------------------");
+			
 			//We can add more functionalities to the CUSTOMER menu as needed...
 			
+			System.out.print(" - Your choice: ");
 			String choice = scanner.nextLine().trim().toUpperCase();
 			
 			//Add functions for each case as needed...
@@ -44,6 +48,10 @@ public class ManagerRoleStrategy implements RoleStrategy {
 				case "CCU":
 					accountCreationHandler.createCurrencyAccount();
 					System.out.println("Currency account created successfully...");
+					break;
+				case "CEA":
+					accountCreationHandler.createEmployeeAccount();
+					System.out.println("Employee account created successfully...");
 					break;
 				case "EXIT":
 					menuChoice = true;

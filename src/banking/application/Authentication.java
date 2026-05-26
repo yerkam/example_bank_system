@@ -4,12 +4,18 @@ import java.io.File;
 import java.util.Scanner;
 
 import banking.infrastructure.FileHandler;
+import banking.infrastructure.FileUserRepository;
+import banking.infrastructure.UserRepository;
 
 public class Authentication {
 	
 	private final FileHandler fileHandler = FileHandler.getInstance();
     private String accountsFolderPath = fileHandler.getAccountsFolderPath();
+	private UserRepository userRepository;
 	
+	public Authentication(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
 	
 	/**
      * Returns the file path for a specific user's account file.
@@ -47,6 +53,10 @@ public class Authentication {
 	         System.out.println("Error checking account: " + e.getMessage());
 	     }
 	     return false;
+	 }
+	 
+	 public boolean login(long id, String password, String role) {
+	     return userRepository.validateCredentials(id, password, role);
 	 }
 
 }

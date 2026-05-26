@@ -10,12 +10,16 @@ import java.time.LocalDate;
 import java.util.Scanner;
 
 import banking.application.factories.AccountFactory;
+import banking.application.factories.UserFactory;
 import banking.application.utils.IBANGenerator;
 import banking.domain.accounts.CheckingAccount;
 import banking.domain.accounts.CurrencyAccount;
 import banking.domain.accounts.DepositAccount;
+import banking.domain.users.Customer;
+import banking.domain.users.Employee;
 import banking.infrastructure.AccountRepository;
 import banking.infrastructure.FileHandler;
+import banking.infrastructure.UserRepository;
 
 /**
  * Manages account operations using per-user files.
@@ -33,8 +37,10 @@ public class AccountManager {
 
     private AccountRepository accountRepository;
     private IBANGenerator ibanGenerator;
+    private UserRepository userRepository;
     
-    public AccountManager(AccountRepository accountRepository, IBANGenerator ibanGenerator) {
+    public AccountManager(AccountRepository accountRepository, UserRepository userRepository, IBANGenerator ibanGenerator) {
+		this.userRepository = userRepository;
 		this.accountRepository = accountRepository;
 		this.ibanGenerator = ibanGenerator;
 	}
@@ -56,8 +62,14 @@ public class AccountManager {
 		int accountNumber = accountRepository.getAccountTypeCount(id, "Checking") + 1;
 		int iban = ibanGenerator.generateIBAN();
 		
-		CheckingAccount account = AccountFactory.createCheckingAccount(accountNumber, balance, active, iban, name, surname, password, id);
+		CheckingAccount account = AccountFactory.createCheckingAccount(accountNumber, balance, active, iban, id);
 		accountRepository.saveCheckingAccount(id, account);
+		
+		if (!userRepository.userExists(id, "CUSTOMER")) {
+			Customer customer = UserFactory.createCustomer(id, name, surname, password);
+			userRepository.saveUser(customer);
+		}
+		
 	}
     
     
@@ -77,8 +89,13 @@ public class AccountManager {
     	int accountNumber = accountRepository.getAccountTypeCount(id, "Deposit") + 1;
     	LocalDate expiryDate = LocalDate.now().plusMonths(months);
     	
-    	DepositAccount account = AccountFactory.createDepositAccount(accountNumber, balance, expiryDate, name, surname, password, id, months);
+    	DepositAccount account = AccountFactory.createDepositAccount(accountNumber, balance, expiryDate, id, months);
     	accountRepository.saveDepositAccount(id, account);
+    	
+    	if (!userRepository.userExists(id, "CUSTOMER")) {
+			Customer customer = UserFactory.createCustomer(id, name, surname, password);
+			userRepository.saveUser(customer);
+		}
     }
     
     
@@ -101,8 +118,28 @@ public class AccountManager {
         }
 		int accountNumber = accountRepository.getAccountTypeCount(id, "Currency") + 1;
 		
-		CurrencyAccount account = AccountFactory.createCurrencyAccount(accountNumber, balance, currency, name, surname, password, id);
+		CurrencyAccount account = AccountFactory.createCurrencyAccount(accountNumber, balance, currency, id);
 		accountRepository.saveCurrencyAccount(id, account);
+		
+		if (!userRepository.userExists(id, "CUSTOMER")) {
+			Customer customer = UserFactory.createCustomer(id, name, surname, password);
+			userRepository.saveUser(customer);
+		}
+	}
+    
+    public void createEmployeeAccount(String name, String surname, long id, String password) {
+		if (userRepository.userExists(id, "EMPLOYEE")) {
+			System.out.println("An employee with this ID already exists. Account creation failed.");
+			return;
+		}
+		
+		Employee employee = UserFactory.createEmployee(id, name, surname, password);
+		userRepository.saveUser(employee);
+	}
+    
+    public long generateID(String role) {
+		long newID = userRepository.getNextUserId(role);
+		return newID;
 	}
     
 
