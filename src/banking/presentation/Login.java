@@ -9,6 +9,7 @@ import banking.presentation.menu.EmployeeRoleStrategy;
 import banking.presentation.menu.ManagerRoleStrategy;
 import banking.presentation.menu.RoleContext;
 import banking.presentation.menu.RoleStrategy;
+import banking.presentation.utils.AccountCreationHandler;
 
 /**
  * The login class handles user authentication and account creation for the banking system.
@@ -21,6 +22,7 @@ public class Login {
 	// Can be found in the banking.application package. It serves as a single point of access to the various functionalities 
 	// of the banking system, such as account creation, card management, and authentication.
 	private BankFacade bankFacade;
+	private AccountCreationHandler accountCreationHandler;
 	
 	/**
 	 * Displays the login menu and handles user input for logging in or creating a new account.
@@ -28,8 +30,9 @@ public class Login {
 	 */
 	public Login(BankFacade bankFacade) {	
 		this.bankFacade = bankFacade;
+		accountCreationHandler = new AccountCreationHandler(bankFacade);
 		
-		System.out.println("Welcome to the Banking System!");
+		System.out.println("--- Welcome to the Banking System! ---");
 		boolean loginChoice = false;
 		boolean personnelType = false; 
 		String loginEntity = "";
@@ -38,11 +41,12 @@ public class Login {
 		
 		
 		while(!personnelType) { 
-			System.out.println("Please select an option (A, B, C):");
+			System.out.println("---------------------------------------------------------");
 			System.out.println("A. CUSTOMER LOGIN");
 			System.out.println("B. BANK EMPLOYEE LOGIN");
 			System.out.println("C. BANK MANAGER LOGIN");
 			System.out.println("D. Exit");
+			System.out.print("Please select an option (A, B, C, D): ");
 			
 			String choice = scanner.nextLine().trim().toLowerCase();
 			
@@ -70,15 +74,18 @@ public class Login {
 		
 		while (!loginChoice) {
 			if (loginEntity.equalsIgnoreCase("customer")) {
-				System.out.println("Please select an option (1, 2, 3):");
-				System.out.println("1. Log in ");
+				System.out.println("---------------------------------------------------------");
+				System.out.println("1. Log in");
 				System.out.println("2. Register for a new account");
 				System.out.println("3. Exit");
+				System.out.print("Please select an option (1, 2, 3): ");
 				
 				String choice = scanner.nextLine().trim();
 				
 				switch (choice) {
 					case "1":
+//						System.out.println("---------------------------------------------------------");
+//						System.out.println("Welcome to the Banking System!");
 						loginProcess(loginEntity);
 						loginChoice = true;
 						break;
@@ -107,95 +114,92 @@ public class Login {
 	 * @param loginEntity The type of user logging in (customer, employee, or manager) to tailor the login process accordingly.
 	 */
 	public void loginProcess(String loginEntity) {
-		System.out.println("Welcome to the Banking System!");
+		
 		System.out.println("Please enter your ID and password to log in.");
+		long ID = 0; boolean loggedIn = false; int failedAttempts = 0;
 		
-		System.out.println("ID: ");
-		long ID = Long.parseLong(scanner.nextLine().trim());
-
-		// Freeze account after 3 failed login attempts
-		int failedAttempts = 0;
-        boolean loggedIn = false;
-		
-		String password = "";
-        while (failedAttempts < 3 && !loggedIn) {
-            System.out.println("Password (must be 6 digits):");
-            password = scanner.nextLine().trim();
-            // Is password exactly 6 digits? If so, break the loop
-            if (password.matches("\\d{6}")) {
-                break;
-            } else {
+		while(failedAttempts < 3 && !loggedIn) {
+			
+			boolean validID = false;
+			
+			while(!validID) {
+				try {
+					System.out.println("---------------------------------------------------------");
+					System.out.print("ID: ");
+					ID = Long.parseLong(scanner.nextLine().trim());
+					validID = true;
+				} catch (NumberFormatException e) {
+					System.out.println("Invalid ID format! ID must be a number.");
+				}
+			}
+			
+			boolean validPassword = false;
+			String password = "";
+			while(!validPassword) {
+				System.out.println("---------------------------------------------------------");
+				System.out.println("Password (must be 6 digits):");
+				password = scanner.nextLine().trim();
+				if (password.matches("\\d{6}")) {
+					validPassword = true;
+				} 
+				else {
+					System.out.println("Invalid format! Password must be exactly 6 digits.");
+				}
+			}
+			
+			
+			if (password.matches("\\d{6}")) {
+            	if (bankFacade.doesAccountExist(ID, password)) {
+        			System.out.println("Login successful!");
+        			loggedIn = true;
+        			
+        			RoleStrategy roleStrategy;
+        			switch (loginEntity) {
+        				case "customer":
+        					roleStrategy = new CustomerRoleStrategy(bankFacade, accountCreationHandler);
+        					break;
+        				case "employee":
+        					roleStrategy = new EmployeeRoleStrategy(bankFacade, accountCreationHandler);
+        					break;
+        				case "manager":
+        					roleStrategy = new ManagerRoleStrategy(bankFacade, accountCreationHandler);
+        					break;
+        				default:
+        					System.out.println("Invalid login entity. Exiting.");
+        					System.exit(0);
+        					return; // This return is just to satisfy the compiler, it will never be reached.
+        			}
+        			RoleContext roleContext = new RoleContext(roleStrategy);
+        			roleContext.showMenu();
+        			
+        		} 
+            	else {
+        			failedAttempts++;
+        			if(failedAttempts < 3) {
+        				System.out.println("Login failed! Please try again.");
+        			}
+        			else{
+        				bankFacade.freezeAccount(ID, 1);
+        				System.out.println("You have entered the wrong password 3 times!");
+        				System.out.println("For your security, your primary checking account has been frozen.");
+        				System.out.println("Please contact bank personnel to reactivate it.");
+        			}
+        		}
+            } 
+            else {
                 System.out.println("Invalid format! Password must be exactly 6 digits.");
             }
-        }
-		
-		if (bankFacade.doesAccountExist(ID, password)) {
-			System.out.println("Login successful!");
-			loggedIn = true;
 			
-			RoleStrategy roleStrategy;
-			switch (loginEntity) {
-				case "customer":
-					roleStrategy = new CustomerRoleStrategy(bankFacade);
-					break;
-				case "employee":
-					roleStrategy = new EmployeeRoleStrategy(bankFacade);
-					break;
-				case "manager":
-					roleStrategy = new ManagerRoleStrategy(bankFacade);
-					break;
-				default:
-					System.out.println("Invalid login entity. Exiting.");
-					System.exit(0);
-					return; // This return is just to satisfy the compiler, it will never be reached.
-			}
-			RoleContext roleContext = new RoleContext(roleStrategy);
-			roleContext.showMenu();
-			
-		} else {
-			failedAttempts++;
-			if(failedAttempts < 3) {
-				System.out.println("Login failed! Please try again.");
-			}else{
-				bankFacade.freezeAccount(ID, 1);
-				System.out.println("You have entered the wrong password 3 times!");
-				System.out.println("For your security, your primary checking account has been frozen.");
-				System.out.println("Please contact bank personnel to reactivate it.");
-			}
 		}
+		
+		
 	}
 	
 	/**
 	 * Handles the account creation process by prompting the user for their details and creating a new account using the AccountManager.
 	 */
 	public void createAccount() {
-		System.out.println("Welcome to the Banking System!");
-		System.out.println("Please enter your details to create a new account.");
-		
-		System.out.println("First Name: ");
-		String firstName = scanner.nextLine().trim();
-		
-		System.out.println("Last Name: ");
-		String lastName = scanner.nextLine().trim();
-		
-		System.out.println("ID: ");
-		long ID = Long.parseLong(scanner.nextLine().trim());
-		
-		String password = "";
-        while (true) {
-            System.out.println("Password (must be 6 digits):");
-            password = scanner.nextLine().trim();
-            // Şifre tam 6 rakamdan oluşuyorsa döngüden çık
-            if (password.matches("\\d{6}")) {
-                break;
-            } else {
-                System.out.println("Invalid format! Password must be exactly 6 digits.");
-            }
-        }
-
-		System.out.println("Balance you want to deposit: ");
-		double balance = Double.parseDouble(scanner.nextLine().trim());
-
-		bankFacade.createCheckingAccount(firstName, lastName, ID, password, balance, true);
+		accountCreationHandler.createCheckingAccount();
+		System.out.println("Account created successfully! Please log in with your new credentials.");
 	}	 
 }

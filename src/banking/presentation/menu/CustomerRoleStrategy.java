@@ -3,13 +3,16 @@ package banking.presentation.menu;
 import java.util.Scanner;
 
 import banking.application.BankFacade;
+import banking.presentation.utils.AccountCreationHandler;
 
 public class CustomerRoleStrategy implements RoleStrategy {
 	static Scanner scanner = new Scanner(System.in);
 	private BankFacade bankFacade;
+	private AccountCreationHandler accountCreationHandler;
 	
-	public CustomerRoleStrategy(BankFacade bankFacade) {
+	public CustomerRoleStrategy(BankFacade bankFacade, AccountCreationHandler accountCreationHandler) {
 		this.bankFacade = bankFacade;
+		this.accountCreationHandler = accountCreationHandler;
 	}
 	
 	
@@ -36,13 +39,35 @@ public class CustomerRoleStrategy implements RoleStrategy {
 			
 			//Add functions for each case as needed...
 			switch (choice) {
-				case "1":
-					menuChoice = true;
+				case "CC":
+					accountCreationHandler.createCheckingAccount();
+					System.out.println("Checking account created successfully...");
 					break;
-				case "2":
-					menuChoice = true;
+				case "CD":
+					accountCreationHandler.createDepositAccount();
+					System.out.println("Deposit account created successfully...");
 					break;
-				case "3":
+				case "CCU":
+					accountCreationHandler.createCurrencyAccount();
+					System.out.println("Currency account created successfully...");
+					break;
+				case "VA":
+					
+					break;
+				case "VT":
+					
+					break;
+				case "TR":
+					
+					break;
+				case "TL":
+					
+					break;
+				case "RSP":
+					
+					break;
+				case "EXIT":
+					menuChoice = true;
 					System.out.println("Thank you for using the Banking System. Goodbye!");
 					System.exit(0);
 				default:
