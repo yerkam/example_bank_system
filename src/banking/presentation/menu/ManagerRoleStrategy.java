@@ -2,9 +2,15 @@ package banking.presentation.menu;
 
 import java.util.Scanner;
 
+import banking.application.BankFacade;
+
 public class ManagerRoleStrategy implements RoleStrategy {
 	static Scanner scanner = new Scanner(System.in);
+	private BankFacade bankFacade;
 	
+	public ManagerRoleStrategy(BankFacade bankFacade) {
+		this.bankFacade = bankFacade;
+	}
 	
 	
 	public void showMenu() {

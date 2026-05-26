@@ -2,9 +2,7 @@ package banking.presentation;
 
 import java.util.Scanner;
 
-import banking.application.AccountManager;
-import banking.application.Authentication;
-import banking.application.utils.IBANGenerator;
+import banking.application.BankFacade;
 import banking.infrastructure.AccountRepository;
 import banking.presentation.menu.CustomerRoleStrategy;
 import banking.presentation.menu.EmployeeRoleStrategy;
@@ -19,16 +17,17 @@ import banking.presentation.menu.RoleStrategy;
 public class Login {
 	
 	static Scanner scanner = new Scanner(System.in);
-	private AccountManager accountManager;
-	private Authentication authentication;
+	// The BankFacade is used to interact with the underlying application logic for authentication and account management. 
+	// Can be found in the banking.application package. It serves as a single point of access to the various functionalities 
+	// of the banking system, such as account creation, card management, and authentication.
+	private BankFacade bankFacade;
 	
 	/**
 	 * Displays the login menu and handles user input for logging in or creating a new account.
 	 * The user can choose to log in as a customer, bank employee, or bank manager, or exit the system.
 	 */
-	public Login(AccountManager accountManager, Authentication authentication) {
-		this.accountManager = accountManager;
-		this.authentication = authentication;
+	public Login(BankFacade bankFacade) {	
+		this.bankFacade = bankFacade;
 		
 		System.out.println("Welcome to the Banking System!");
 		boolean loginChoice = false;
@@ -130,20 +129,20 @@ public class Login {
             }
         }
 		
-		if (doesAccountExist(ID, password)) {
+		if (bankFacade.doesAccountExist(ID, password)) {
 			System.out.println("Login successful!");
 			loggedIn = true;
 			
 			RoleStrategy roleStrategy;
 			switch (loginEntity) {
 				case "customer":
-					roleStrategy = new CustomerRoleStrategy();
+					roleStrategy = new CustomerRoleStrategy(bankFacade);
 					break;
 				case "employee":
-					roleStrategy = new EmployeeRoleStrategy();
+					roleStrategy = new EmployeeRoleStrategy(bankFacade);
 					break;
 				case "manager":
-					roleStrategy = new ManagerRoleStrategy();
+					roleStrategy = new ManagerRoleStrategy(bankFacade);
 					break;
 				default:
 					System.out.println("Invalid login entity. Exiting.");
@@ -158,23 +157,13 @@ public class Login {
 			if(failedAttempts < 3) {
 				System.out.println("Login failed! Please try again.");
 			}else{
-				banking.application.AccountSecurityManager.freezeAccount(ID, 1);
+				bankFacade.freezeAccount(ID, 1);
 				System.out.println("You have entered the wrong password 3 times!");
 				System.out.println("For your security, your primary checking account has been frozen.");
 				System.out.println("Please contact bank personnel to reactivate it.");
 			}
 		}
 	}
-	
-	/**
-	 * Checks if an account with the given ID and password exists in the login details file.
-	 * @param ID The user ID to check.
-	 * @param password The password to check.
-	 * @return true if the account exists, false otherwise.
-	 */
-	public boolean doesAccountExist(long ID, String password) {
-		return authentication.checkAccount(ID, password);
-    }
 	
 	/**
 	 * Handles the account creation process by prompting the user for their details and creating a new account using the AccountManager.
@@ -207,6 +196,6 @@ public class Login {
 		System.out.println("Balance you want to deposit: ");
 		double balance = Double.parseDouble(scanner.nextLine().trim());
 
-		accountManager.createCheckingAccount(firstName, lastName, ID, password, balance, true);
+		bankFacade.createCheckingAccount(firstName, lastName, ID, password, balance, true);
 	}	 
 }

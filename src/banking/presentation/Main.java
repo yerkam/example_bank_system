@@ -1,7 +1,9 @@
 package banking.presentation;
 
 import banking.application.AccountManager;
+import banking.application.AccountSecurityManager;
 import banking.application.Authentication;
+import banking.application.BankFacade;
 import banking.application.CardManager;
 import banking.application.utils.CardGenerator;
 import banking.application.utils.IBANGenerator;
@@ -23,12 +25,16 @@ public class Main {
     	  
     	  // Initiating the Application layer
     	  AccountManager accountManager = new AccountManager(accountRepository, ibanGenerator);
+    	  CardManager cardManager = new CardManager(cardRepository, accountRepository, cardGenerator);
+    	  AccountSecurityManager accountSecurityManager = new AccountSecurityManager();
+    	  
+    	  // Initiaiting the Bank Facade 
+    	  BankFacade bankFacade = new BankFacade(accountManager, cardManager, authentication, accountSecurityManager);
     	  
     	  // Starting the presentation layer
-    	  new Login(accountManager, authentication);
+    	  new Login(bankFacade);
     	  
     	  // Testing the Card Creation logic...
-//    	  CardManager cardManager = new CardManager(cardRepository, accountRepository, cardGenerator);
 //          cardManager.createCreditCard(1234678, "Main Doe", 10000, 28);
 //          cardManager.createDebitCard(1234678, 1, "Main Doe");
       }

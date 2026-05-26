@@ -14,9 +14,9 @@ import banking.infrastructure.FileHandler;
  * Works with per-user account files in the Accounts folder.
  */
 public class AccountSecurityManager {
-    static FileHandler fileHandler = new FileHandler();
-    private final static String accountsFolderPath = fileHandler.getAccountsFolderPath();
-    private final static String frozenAccountsFile = fileHandler.getFrozenAccountsFile();
+	private final FileHandler fileHandler = FileHandler.getInstance();
+    private String accountsFolderPath = fileHandler.getAccountsFolderPath();
+    private String frozenAccountsFile = fileHandler.getFrozenAccountsFile();
 
     /**
      * Generates a random alphanumeric password for account reactivation.
@@ -42,7 +42,7 @@ public class AccountSecurityManager {
      * @param accountNumber The checking account number to freeze.
      * @return The reactivation password, or null if the operation failed.
      */
-    public static String freezeAccount(long userId, int accountNumber) {
+    public String freezeAccount(long userId, int accountNumber) {
         try {
             String filePath = accountsFolderPath + File.separator + userId + ".txt";
             Path userPath = Paths.get(filePath);
@@ -176,7 +176,7 @@ public class AccountSecurityManager {
         }
     }
 
-    public static void renewPassword(long ID, String newPassword){
+    public void renewPassword(long ID, String newPassword){
         try {
             String filePath = accountsFolderPath + File.separator + ID + ".txt";
             Path userPath = Paths.get(filePath);

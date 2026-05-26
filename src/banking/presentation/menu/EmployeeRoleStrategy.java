@@ -2,8 +2,15 @@ package banking.presentation.menu;
 
 import java.util.Scanner;
 
+import banking.application.BankFacade;
+
 public class EmployeeRoleStrategy implements RoleStrategy {
 	static Scanner scanner = new Scanner(System.in);
+	private BankFacade bankFacade;
+	
+	public EmployeeRoleStrategy(BankFacade bankFacade) {
+		this.bankFacade = bankFacade;
+	}
 	
 	
 	@Override
