@@ -5,16 +5,20 @@ import java.util.Scanner;
 import banking.application.BankFacade;
 import banking.domain.users.User;
 import banking.presentation.utils.AccountCreationHandler;
+import banking.presentation.utils.CardCreationHandler;
 
 public class CustomerRoleStrategy implements RoleStrategy {
 	static Scanner scanner = new Scanner(System.in);
 	private BankFacade bankFacade;
 	private AccountCreationHandler accountCreationHandler;
+	private CardCreationHandler cardCreationHandler;
 	private User loggedInUser;
 	
-	public CustomerRoleStrategy(BankFacade bankFacade, AccountCreationHandler accountCreationHandler, User loggedInUser) {
+	public CustomerRoleStrategy(BankFacade bankFacade, AccountCreationHandler accountCreationHandler,
+			CardCreationHandler cardCreationHandler, User loggedInUser) {
 		this.bankFacade = bankFacade;
 		this.accountCreationHandler = accountCreationHandler;
+		this.cardCreationHandler = cardCreationHandler;
 		this.loggedInUser = loggedInUser;
 	}
 	
@@ -59,10 +63,10 @@ public class CustomerRoleStrategy implements RoleStrategy {
 					System.out.println("Currency account created successfully...");
 					break;
 				case "CCA":
-					
+					cardCreationHandler.createCreditCard(loggedInUser);
 					break;
 				case "DCA":
-					
+					cardCreationHandler.createDebitCard(loggedInUser);
 					break;
 				case "VA":
 					

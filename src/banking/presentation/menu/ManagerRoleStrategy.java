@@ -5,16 +5,20 @@ import java.util.Scanner;
 import banking.application.BankFacade;
 import banking.domain.users.User;
 import banking.presentation.utils.AccountCreationHandler;
+import banking.presentation.utils.CardCreationHandler;
 
 public class ManagerRoleStrategy implements RoleStrategy {
 	static Scanner scanner = new Scanner(System.in);
 	private BankFacade bankFacade;
 	private AccountCreationHandler accountCreationHandler;
+	private CardCreationHandler cardCreationHandler;
 	private User loggedInUser;
 	
-	public ManagerRoleStrategy(BankFacade bankFacade, AccountCreationHandler accountCreationHandler, User loggedInUser) {
+	public ManagerRoleStrategy(BankFacade bankFacade, AccountCreationHandler accountCreationHandler,
+			CardCreationHandler cardCreationHandler, User loggedInUser) {
 		this.bankFacade = bankFacade;
 		this.accountCreationHandler = accountCreationHandler;
+		this.cardCreationHandler = cardCreationHandler;
 		this.loggedInUser = loggedInUser;
 	}
 	

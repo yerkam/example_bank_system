@@ -10,6 +10,7 @@ import banking.presentation.menu.ManagerRoleStrategy;
 import banking.presentation.menu.RoleContext;
 import banking.presentation.menu.RoleStrategy;
 import banking.presentation.utils.AccountCreationHandler;
+import banking.presentation.utils.CardCreationHandler;
 
 /**
  * The login class handles user authentication and account creation for the banking system.
@@ -23,6 +24,7 @@ public class Login {
 	// of the banking system, such as account creation, card management, and authentication.
 	private BankFacade bankFacade;
 	private AccountCreationHandler accountCreationHandler;
+	private CardCreationHandler cardCreationHandler;
 	
 	/**
 	 * Displays the login menu and handles user input for logging in or creating a new account.
@@ -31,6 +33,7 @@ public class Login {
 	public Login(BankFacade bankFacade) {	
 		this.bankFacade = bankFacade;
 		accountCreationHandler = new AccountCreationHandler(bankFacade);
+		cardCreationHandler = new CardCreationHandler(bankFacade);
 		
 		System.out.println("--- Welcome to the Banking System! ---");
 		boolean loginChoice = false;
@@ -157,13 +160,13 @@ public class Login {
         			RoleStrategy roleStrategy;
         			switch (loginEntity) {
         				case "customer":
-        					roleStrategy = new CustomerRoleStrategy(bankFacade, accountCreationHandler, loggedInUser);
+        					roleStrategy = new CustomerRoleStrategy(bankFacade, accountCreationHandler, cardCreationHandler, loggedInUser);
         					break;
         				case "employee":
-        					roleStrategy = new EmployeeRoleStrategy(bankFacade, accountCreationHandler, loggedInUser);
+        					roleStrategy = new EmployeeRoleStrategy(bankFacade, accountCreationHandler, cardCreationHandler, loggedInUser);
         					break;
         				case "manager":
-        					roleStrategy = new ManagerRoleStrategy(bankFacade, accountCreationHandler, loggedInUser);
+        					roleStrategy = new ManagerRoleStrategy(bankFacade, accountCreationHandler,  cardCreationHandler, loggedInUser);
         					break;
         				default:
         					System.out.println("Invalid login entity. Exiting.");

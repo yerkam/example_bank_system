@@ -194,7 +194,7 @@ public class FileAccountRepository implements AccountRepository {
 //		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());
 
         try (FileWriter writer = new FileWriter(getUserFilePath(account.getUserId()), true)) {
-            writer.write("Checking#" + account.getAccountNumber() + "#" + account.getBalance() + "#" + account.isActive() + "#" +  "\n");
+            writer.write("Checking#" + account.getAccountNumber() + "#" + account.getBalance() + "#" + account.isActive() + "#" + account.getIban() +  "\n");
         } catch (Exception e) {
             System.out.println("An error occurred while creating the checking account: " + e.getMessage());
         }

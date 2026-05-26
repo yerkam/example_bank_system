@@ -69,6 +69,7 @@ public class CardManager {
 	
 	    boolean saved = cardRepository.saveCreditCard(card);
 	    if (saved) {
+	    	System.out.println("Credit Card has been created successfully...");
 	    	return cardNumber;
 	    }
 	    else {
@@ -109,6 +110,7 @@ public class CardManager {
         boolean saved = cardRepository.saveDebitCard(card, userId, accountNumber);
 
         if (saved) {
+	    	System.out.println("Debit Card has been created successfully...");
 			return cardNumber;
 		}
 		else {
