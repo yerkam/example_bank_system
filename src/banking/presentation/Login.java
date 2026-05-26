@@ -3,7 +3,7 @@ package banking.presentation;
 import java.util.Scanner;
 
 import banking.application.BankFacade;
-import banking.infrastructure.AccountRepository;
+import banking.domain.users.User;
 import banking.presentation.menu.CustomerRoleStrategy;
 import banking.presentation.menu.EmployeeRoleStrategy;
 import banking.presentation.menu.ManagerRoleStrategy;
@@ -149,20 +149,21 @@ public class Login {
 			
 			
 			if (password.matches("\\d{6}")) {
-            	if (bankFacade.doesAccountExist(ID, password, loginEntity.toUpperCase())) {
+				User loggedInUser = bankFacade.authenticateUser(ID, password,loginEntity.toUpperCase());
+            	if (loggedInUser != null) {
         			System.out.println("Login successful!");
         			loggedIn = true;
         			
         			RoleStrategy roleStrategy;
         			switch (loginEntity) {
         				case "customer":
-        					roleStrategy = new CustomerRoleStrategy(bankFacade, accountCreationHandler);
+        					roleStrategy = new CustomerRoleStrategy(bankFacade, accountCreationHandler, loggedInUser);
         					break;
         				case "employee":
-        					roleStrategy = new EmployeeRoleStrategy(bankFacade, accountCreationHandler);
+        					roleStrategy = new EmployeeRoleStrategy(bankFacade, accountCreationHandler, loggedInUser);
         					break;
         				case "manager":
-        					roleStrategy = new ManagerRoleStrategy(bankFacade, accountCreationHandler);
+        					roleStrategy = new ManagerRoleStrategy(bankFacade, accountCreationHandler, loggedInUser);
         					break;
         				default:
         					System.out.println("Invalid login entity. Exiting.");
@@ -199,7 +200,7 @@ public class Login {
 	 * Handles the account creation process by prompting the user for their details and creating a new account using the AccountManager.
 	 */
 	public void createAccount() {
-		accountCreationHandler.createCheckingAccount();
+		accountCreationHandler.registerCustomer();
 		System.out.println("Account created successfully! Please log in with your new credentials.");
 	}	 
 }

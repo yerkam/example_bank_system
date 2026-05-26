@@ -7,9 +7,9 @@ public class DepositAccount extends Account {
     private LocalDate expiryDate;
     private int months;
 
-    public DepositAccount(int accountNumber, double balance, LocalDate expiryDate, long id, int months) {
+    public DepositAccount(int accountNumber, double balance, LocalDate expiryDate, long userId, int months) {
 
-        super(accountNumber, balance, id);
+        super(accountNumber, balance, userId);
         this.expiryDate = expiryDate;
         this.months = months;
     }

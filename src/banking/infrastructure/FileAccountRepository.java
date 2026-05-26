@@ -43,27 +43,59 @@ public class FileAccountRepository implements AccountRepository {
      * @param accountType The account type to count.
      * @return The number of accounts of the specified type.
      */
-	public int getAccountTypeCount(long userId, String accountType) {
-		String filePath = getUserFilePath(userId);
+    public int getAccountTypeCount(long userId, String accountType) {
+
+        String filePath = getUserFilePath(userId);
+
         File file = new File(filePath);
-        if (!file.exists()) return 0;
 
         int count = 0;
+
+        if ("CHECKING".equals(accountType.toUpperCase())) {
+            count = 1000;
+        }
+        else if ("DEPOSIT".equals(accountType.toUpperCase())) {
+            count = 2000;
+        }
+        else if ("CURRENCY".equals(accountType.toUpperCase())) {
+            count = 3000;
+        }
+
+        if (!file.exists()) {
+            return count;
+        }
+
         try (Scanner reader = new Scanner(file)) {
-            if (reader.hasNextLine()) reader.nextLine();
+
+            if (reader.hasNextLine()) {
+                reader.nextLine();
+            }
+
             while (reader.hasNextLine()) {
+
                 String line = reader.nextLine().trim();
-                if (line.isEmpty()) continue;
+
+                if (line.isEmpty()) {
+                    continue;
+                }
+
                 String[] parts = line.split("#");
-                if (parts[0].equals(accountType)) {
+
+                if (parts[0].equalsIgnoreCase(accountType)) {
                     count++;
                 }
             }
+
         } catch (FileNotFoundException e) {
-            System.out.println("Error reading user file: " + e.getMessage());
+
+            System.out.println(
+                    "Error reading user file: "
+                            + e.getMessage()
+            );
         }
+
         return count;
-	}
+    }
 		
 	/**
 	 * Checks if a debit card IBAN exists for a given user and account number.
@@ -161,8 +193,8 @@ public class FileAccountRepository implements AccountRepository {
 	public void saveCheckingAccount(long userId, CheckingAccount account) {
 //		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());
 
-        try (FileWriter writer = new FileWriter(getUserFilePath(account.getId()), true)) {
-            writer.write("Checking#" + account.getAccountNumber() + "#" + account.getBalance() + "#" + account.isActive() + "#" + account.getIban() + "\n");
+        try (FileWriter writer = new FileWriter(getUserFilePath(account.getUserId()), true)) {
+            writer.write("Checking#" + account.getAccountNumber() + "#" + account.getBalance() + "#" + account.isActive() + "#" +  "\n");
         } catch (Exception e) {
             System.out.println("An error occurred while creating the checking account: " + e.getMessage());
         }
@@ -180,10 +212,10 @@ public class FileAccountRepository implements AccountRepository {
 	public void saveDepositAccount(long userId, DepositAccount account) {
 //		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());
 
-        try (FileWriter writer = new FileWriter(getUserFilePath(account.getId()), true)) {
+        try (FileWriter writer = new FileWriter(getUserFilePath(account.getUserId()), true)) {
             LocalDate date = LocalDate.now();
             LocalDate expiryDate = date.plusMonths(account.getMonths());
-            writer.write("Deposit#" + account.getAccountNumber() + "#" + account.getBalance() + "#" + expiryDate + "\n");
+            writer.write("Deposit#" + account.getAccountNumber() + "#" + account.getBalance() + "#" + expiryDate + "#" + "\n");
         } catch (Exception e) {
             System.out.println("An error occurred while creating the deposit account: " + e.getMessage());
         }
@@ -202,8 +234,8 @@ public class FileAccountRepository implements AccountRepository {
 
 //		ensureUserFile(account.getName(), account.getSurname(), account.getId(), account.getPassword());
 
-        try (FileWriter writer = new FileWriter(getUserFilePath(account.getId()), true)) {
-            writer.write("Currency#" + account.getAccountNumber() + "#" + account.getBalance() + "#" + account.getCurrency() + "\n");
+        try (FileWriter writer = new FileWriter(getUserFilePath(account.getUserId()), true)) {
+            writer.write("Currency#" + account.getAccountNumber() + "#" + account.getBalance() + "#" + account.getCurrency() + "#" + "\n");
         } catch (Exception e) {
             System.out.println("An error occurred while creating the currency account: " + e.getMessage());
         }

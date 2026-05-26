@@ -1,5 +1,6 @@
 package banking.application;
 
+import banking.domain.users.User;
 
 public class BankFacade {
 	
@@ -18,16 +19,16 @@ public class BankFacade {
 	}
 	
 	// Account Creation Methods
-	public void createCheckingAccount(String name, String surname, long id, String password, double balance, boolean active) {
-		accountManager.createCheckingAccount(name, surname, id, password, balance, true);
+	public void createCheckingAccount(String name, String surname, long userId, String password, double balance, boolean active) {
+		accountManager.createCheckingAccount(name, surname, userId, password, balance, true);
 	}
 	
-	public void createDepositAccount(String name, String surname, long id, String password, double balance, int months) {
-		accountManager.createDepositAccount(name, surname, id, password, balance, months);
+	public void createDepositAccount(String name, String surname, long userId, String password, double balance, int months) {
+		accountManager.createDepositAccount(name, surname, userId, password, balance, months);
 	}
 	
-	public void createCurrencyAccount(String name, String surname, long id, String password, double balance, String currency) {
-		accountManager.createCurrencyAccount(name, surname, id, password, balance, currency);
+	public void createCurrencyAccount(String name, String surname, long userId, String password, double balance, String currency) {
+		accountManager.createCurrencyAccount(name, surname, userId, password, balance, currency);
 	}
 	
 	public long generateID(String role) {
@@ -36,6 +37,9 @@ public class BankFacade {
 	
 	
 	// Card Creation Methods
+	public boolean userExists(long id, String role) {
+		return accountManager.doesUserExist(id, role);
+	}
 	public void createCreditCard(long userId, String holderName, double creditLimit, int paymentDay) {
 		cardManager.createCreditCard(userId, holderName, creditLimit, paymentDay);
 	}
@@ -50,8 +54,12 @@ public class BankFacade {
 	 * @param password The password to check.
 	 * @return true if the account exists, false otherwise.
 	 */
-	public boolean doesAccountExist(long ID, String password, String role) {
-		return authentication.login(ID, password, role);
+//	public boolean doesAccountExist(long ID, String password, String role) {
+//		return authentication.login(ID, password, role);
+//	}
+	
+	public User authenticateUser(long ID, String password, String role) {
+		return authentication.authenticateUser(ID, password, role);
 	}
 	
 	// Account Security Methods

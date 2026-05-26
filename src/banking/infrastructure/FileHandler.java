@@ -178,14 +178,14 @@ public class FileHandler {
 	}
     
     public void instantiateManager() {
-    	if (!managerExists(5001)) {
+    	if (!managerExists(6001)) {
     		String filePath = getManagersFile();
     	    try (FileWriter writer = new FileWriter(filePath, true)) {
     	        writer.write(
-    	            "5001" + "#" + "Manager" + "#" + "One" + "#" +
+    	            "6001" + "#" + "Manager" + "#" + "One" + "#" +
     	            SecurityUtil.hashText("123456") + "#" + "MANAGER" + "\n");
     	        
-    	        System.out.println("MANAGER account created with ID: 5001 and password: 12345");
+    	        System.out.println("MANAGER account created with ID: 6001 and password: 12345");
     	    } 
     	    catch (Exception e) {
     	        System.out.println("Error initiating MANAGER: " + e.getMessage());

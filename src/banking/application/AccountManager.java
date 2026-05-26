@@ -58,17 +58,19 @@ public class AccountManager {
 	 * @param balance  Client's account balance
 	 * @param active   Client's account status
 	 */
-    public void createCheckingAccount(String name, String surname, long id, String password, double balance, boolean active) {
-		int accountNumber = accountRepository.getAccountTypeCount(id, "Checking") + 1;
-		int iban = ibanGenerator.generateIBAN();
-		
-		CheckingAccount account = AccountFactory.createCheckingAccount(accountNumber, balance, active, iban, id);
-		accountRepository.saveCheckingAccount(id, account);
-		
-		if (!userRepository.userExists(id, "CUSTOMER")) {
-			Customer customer = UserFactory.createCustomer(id, name, surname, password);
+    public void createCheckingAccount(String name, String surname, long userId, String password, double balance, boolean active) {
+    	if (!userRepository.userExists(userId, "CUSTOMER")) {
+			Customer customer = UserFactory.createCustomer(userId, name, surname, password);
 			userRepository.saveUser(customer);
 		}
+    	
+    	
+    	int accountNumber = accountRepository.getAccountTypeCount(userId, "Checking") + 1;
+		int iban = ibanGenerator.generateIBAN();
+		
+		CheckingAccount account = AccountFactory.createCheckingAccount(accountNumber, balance, active, iban, userId);
+		accountRepository.saveCheckingAccount(userId, account);
+		
 		
 	}
     
@@ -85,17 +87,18 @@ public class AccountManager {
 	 * @param balance  Client's account balance
 	 * @param months   Client's account duration in months
 	 */
-    public void createDepositAccount(String name, String surname, long id, String password, double balance, int months) {
-    	int accountNumber = accountRepository.getAccountTypeCount(id, "Deposit") + 1;
-    	LocalDate expiryDate = LocalDate.now().plusMonths(months);
-    	
-    	DepositAccount account = AccountFactory.createDepositAccount(accountNumber, balance, expiryDate, id, months);
-    	accountRepository.saveDepositAccount(id, account);
-    	
-    	if (!userRepository.userExists(id, "CUSTOMER")) {
-			Customer customer = UserFactory.createCustomer(id, name, surname, password);
+    public void createDepositAccount(String name, String surname, long userId, String password, double balance, int months) {
+    	if (!userRepository.userExists(userId, "CUSTOMER")) {
+			Customer customer = UserFactory.createCustomer(userId, name, surname, password);
 			userRepository.saveUser(customer);
 		}
+    	
+    	int accountNumber = accountRepository.getAccountTypeCount(userId, "Deposit") + 1;
+    	LocalDate expiryDate = LocalDate.now().plusMonths(months);
+    	
+    	DepositAccount account = AccountFactory.createDepositAccount(accountNumber, balance, expiryDate, userId, months);
+    	accountRepository.saveDepositAccount(userId, account);
+    	
     }
     
     
@@ -111,20 +114,22 @@ public class AccountManager {
 	 * @param balance  Client's account balance
 	 * @param months   Client's account currency type (USD or EUR)
 	 */
-    public void createCurrencyAccount(String name, String surname, long id, String password, double balance, String currency) {
+    public void createCurrencyAccount(String name, String surname, long userId, String password, double balance, String currency) {
     	if (!currency.equals("USD") && !currency.equals("EUR")) {
             System.out.println("Invalid currency type. Only USD and EUR are supported. Account creation failed.");
             return;
         }
-		int accountNumber = accountRepository.getAccountTypeCount(id, "Currency") + 1;
-		
-		CurrencyAccount account = AccountFactory.createCurrencyAccount(accountNumber, balance, currency, id);
-		accountRepository.saveCurrencyAccount(id, account);
-		
-		if (!userRepository.userExists(id, "CUSTOMER")) {
-			Customer customer = UserFactory.createCustomer(id, name, surname, password);
+    	
+    	if (!userRepository.userExists(userId, "CUSTOMER")) {
+			Customer customer = UserFactory.createCustomer(userId, name, surname, password);
 			userRepository.saveUser(customer);
 		}
+    	
+		int accountNumber = accountRepository.getAccountTypeCount(userId, "Currency") + 1;
+		
+		CurrencyAccount account = AccountFactory.createCurrencyAccount(accountNumber, balance, currency, userId);
+		accountRepository.saveCurrencyAccount(userId, account);
+		
 	}
     
     public void createEmployeeAccount(String name, String surname, long id, String password) {
@@ -141,6 +146,10 @@ public class AccountManager {
 		long newID = userRepository.getNextUserId(role);
 		return newID;
 	}
+    
+    public boolean doesUserExist(long id, String role) {
+    	return userRepository.userExists(id, role.toUpperCase());
+    }
     
 
 }

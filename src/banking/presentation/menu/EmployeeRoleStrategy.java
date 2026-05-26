@@ -3,16 +3,19 @@ package banking.presentation.menu;
 import java.util.Scanner;
 
 import banking.application.BankFacade;
+import banking.domain.users.User;
 import banking.presentation.utils.AccountCreationHandler;
 
 public class EmployeeRoleStrategy implements RoleStrategy {
 	static Scanner scanner = new Scanner(System.in);
 	private BankFacade bankFacade;
 	private AccountCreationHandler accountCreationHandler;
+	private User loggedInUser;
 	
-	public EmployeeRoleStrategy(BankFacade bankFacade, AccountCreationHandler accountCreationHandler) {
+	public EmployeeRoleStrategy(BankFacade bankFacade, AccountCreationHandler accountCreationHandler, User loggedInUser) {
 		this.bankFacade = bankFacade;
 		this.accountCreationHandler = accountCreationHandler;
+		this.loggedInUser = loggedInUser;
 	}
 	
 	
@@ -38,15 +41,15 @@ public class EmployeeRoleStrategy implements RoleStrategy {
 			//Add functions for each case as needed...
 			switch (choice) {
 				case "CC":
-					accountCreationHandler.createCheckingAccount();
+//					accountCreationHandler.createCheckingAccountByBank();
 					System.out.println("Checking account created successfully...");
 					break;
 				case "CD":
-					accountCreationHandler.createDepositAccount();
+//					accountCreationHandler.createDepositAccount(loggedInUser);
 					System.out.println("Deposit account created successfully...");
 					break;
 				case "CCU":
-					accountCreationHandler.createCurrencyAccount();
+//					accountCreationHandler.createCurrencyAccount(loggedInUser);
 					System.out.println("Currency account created successfully...");
 					break;
 				case "EXIT":

@@ -2,7 +2,7 @@ package banking.domain.users;
 
 public class Manager extends User {
 	
-	public Manager(long id, String name, String surname, String hashedPassword) {
-		super(id, name, surname, hashedPassword, "MANAGER");
+	public Manager(long userId, String name, String surname, String hashedPassword) {
+		super(userId, name, surname, hashedPassword, "MANAGER");
 	}
 }

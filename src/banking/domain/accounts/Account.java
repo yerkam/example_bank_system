@@ -4,20 +4,20 @@ public abstract class Account {
 
     protected int accountNumber;
     protected double balance;
-    protected long id;
+    protected long userId;
 
-    public Account(int accountNumber, double balance, long id) {
+    public Account(int accountNumber, double balance, long userId) {
         this.accountNumber = accountNumber;
         this.balance = balance;
-        this.id = id;
+        this.userId = userId;
     }
 
     public void deposit(double amount) {
         balance += amount;
     }
 
-	public long getId() {
-		return id;
+	public long getUserId() {
+		return userId;
 	}
 
 	public void withdraw(double amount) {

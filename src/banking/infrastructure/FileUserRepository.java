@@ -26,7 +26,7 @@ public class FileUserRepository implements UserRepository {
 		String filePath = getRoleFilePath(user.getRole());
 	    try (FileWriter writer = new FileWriter(filePath, true)) {
 	        writer.write(
-	            user.getId() + "#" + user.getName() + "#" + user.getSurname() + "#" +
+	            user.getUserId() + "#" + user.getName() + "#" + user.getSurname() + "#" +
 	            SecurityUtil.hashText(user.getHashedPassword()) + "#" + user.getRole() + "\n");
 
 	    } 
@@ -107,9 +107,9 @@ public class FileUserRepository implements UserRepository {
 
 	    long highestId = switch (role.toUpperCase()) {
 
-	        case "CUSTOMER" -> 1000;
-	        case "EMPLOYEE" -> 4000;
-	        case "MANAGER" -> 5000;
+	        case "CUSTOMER" -> 4000;
+	        case "EMPLOYEE" -> 5000;
+	        case "MANAGER" -> 6000;
 
 	        default -> 0;
 	    };

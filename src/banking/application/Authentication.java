@@ -3,6 +3,7 @@ package banking.application;
 import java.io.File;
 import java.util.Scanner;
 
+import banking.domain.users.User;
 import banking.infrastructure.FileHandler;
 import banking.infrastructure.FileUserRepository;
 import banking.infrastructure.UserRepository;
@@ -57,6 +58,16 @@ public class Authentication {
 	 
 	 public boolean login(long id, String password, String role) {
 	     return userRepository.validateCredentials(id, password, role);
+	 }
+	 
+	 public User authenticateUser(long id, String password, String role) {
+		 boolean valid = userRepository.validateCredentials(id, password, role);
+		 
+		 if (!valid) {
+			 return null;
+		 }
+		 
+		 return userRepository.findUserById(id, role);
 	 }
 
 }

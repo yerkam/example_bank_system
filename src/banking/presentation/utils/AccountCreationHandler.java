@@ -3,6 +3,7 @@ package banking.presentation.utils;
 import java.util.Scanner;
 
 import banking.application.BankFacade;
+import banking.domain.users.User;
 
 public class AccountCreationHandler {
 	static Scanner scanner = new Scanner(System.in);
@@ -12,15 +13,18 @@ public class AccountCreationHandler {
 		this.bankFacade = bankFacade;
 	}
 	
+	
 	/**
-	 * Handles the account creation process by prompting the user for their details and
-	 * creating a new checking account using the AccountManager.
+	 * Handles the CUSTOMER account creation process by prompting the user at the login page and 
+	 * creating a new CUSTOMER account using the User Factory.
 	 */
-	public void createCheckingAccount() {
-		boolean validInput = false; String firstName = ""; String lastName = ""; long ID = 0; String password = ""; double balance = 0.0;
-		System.out.println("Please enter your details to create a new account.");
-		
-		while (!validInput) {
+	public void registerCustomer() {
+	    boolean validInput = false;
+
+	    String firstName = ""; String lastName = ""; String password = ""; double balance = 0.0; long userID = 0;
+
+	    System.out.println("Please enter your details to register.");
+	    while (!validInput) {
 			System.out.println("--------------------------");
 			System.out.print("Customer's First Name: ");
 			firstName = scanner.nextLine().trim();
@@ -31,8 +35,8 @@ public class AccountCreationHandler {
 				validInput = true;
 			}
 		}
-		
-		validInput = false;
+
+	    validInput = false;
 		while (!validInput) {
 			System.out.println("--------------------------");
 			System.out.print("Customer's Last Name: ");
@@ -44,10 +48,10 @@ public class AccountCreationHandler {
 				validInput = true;
 			}
 		}
-		
+
 		System.out.println("---------------------------------------------------------");
-		ID = bankFacade.generateID("CUSTOMER");
-		System.out.println("Generated Checking Account ID: " + ID);
+		userID = bankFacade.generateID("CUSTOMER");
+		System.out.println("Generated Customer Account ID: " + userID);
 		
 		validInput = false;
 		while(!validInput) {
@@ -61,6 +65,76 @@ public class AccountCreationHandler {
                 System.out.println("Invalid format! Account Password must be exactly 6 digits.");
             }
 		}
+
+		validInput = false;
+		while (!validInput) {
+			System.out.println("---------------------------------------------------------");
+			try {
+				System.out.print("Initial Account Balance: ");
+				balance = Double.parseDouble(scanner.nextLine().trim());
+				if (balance < 0) {
+					System.out.println("Account Balance cannot be negative. Please try again.");
+				} else {
+					validInput = true;
+				}
+			} catch (NumberFormatException e) {
+				System.out.println("Invalid Account balance format! Account Balance must be a number.");
+			}
+			
+		}
+
+	    bankFacade.createCheckingAccount(firstName, lastName, userID, password, balance, true);
+	}
+	
+	/**
+	 * Handles the account creation process by prompting the user for their details and
+	 * creating a new checking account using the AccountManager.
+	 */
+	public void createCheckingAccount(User user) {
+		boolean validInput = false; double balance = 0.0;
+		System.out.println("Please enter your details to create a new account.");
+		
+//		while (!validInput) {
+//			System.out.println("--------------------------");
+//			System.out.print("Customer's First Name: ");
+//			firstName = scanner.nextLine().trim();
+//			if (firstName.isEmpty()) {
+//				System.out.println("Customer's First name cannot be empty. Please try again.");
+//			}
+//			else {
+//				validInput = true;
+//			}
+//		}
+//		
+//		validInput = false;
+//		while (!validInput) {
+//			System.out.println("--------------------------");
+//			System.out.print("Customer's Last Name: ");
+//			lastName = scanner.nextLine().trim();
+//			if (lastName.isEmpty()) {
+//				System.out.println("Customer's Last name cannot be empty. Please try again.");
+//			}
+//			else {
+//				validInput = true;
+//			}
+//		}
+		
+//		System.out.println("---------------------------------------------------------");
+//		accountID = bankFacade.generateID("ACCOUNT");
+//		System.out.println("Generated Checking Account ID: " + accountID);
+		
+//		validInput = false;
+//		while(!validInput) {
+//			System.out.println("---------------------------------------------------------");
+//			System.out.print("Account Password (must be 6 digits): ");
+//            password = scanner.nextLine().trim();
+//            // Şifre tam 6 rakamdan oluşuyorsa döngüden çık
+//            if (password.matches("\\d{6}")) {
+//                validInput = true;
+//            } else {
+//                System.out.println("Invalid format! Account Password must be exactly 6 digits.");
+//            }
+//		}
 		
 		validInput = false;
 		while (!validInput) {
@@ -79,7 +153,7 @@ public class AccountCreationHandler {
 			
 		}
 		
-		bankFacade.createCheckingAccount(firstName, lastName, ID, password, balance, true);
+		bankFacade.createCheckingAccount(user.getName(), user.getSurname(), user.getUserId(), user.getHashedPassword(), balance, true);
 	}
 	
 	
@@ -87,52 +161,10 @@ public class AccountCreationHandler {
 	 * Handles the account creation process by prompting the user for their details and 
 	 * creating a new deposit account using the AccountManager.
 	 */
-	public void createDepositAccount() {
-		boolean validInput = false; String firstName = ""; String lastName = ""; long ID = 0; String password = ""; double balance = 0.0;
+	public void createDepositAccount(User user) {
+		boolean validInput = false; double balance = 0.0;
 		int months = 0;
 		System.out.println("Please enter your details to create a new account.");
-		
-		while (!validInput) {
-			System.out.println("--------------------------");
-			System.out.print("Customer's First Name: ");
-			firstName = scanner.nextLine().trim();
-			if (firstName.isEmpty()) {
-				System.out.println("Customer's First name cannot be empty. Please try again.");
-			}
-			else {
-				validInput = true;
-			}
-		}
-		
-		validInput = false;
-		while (!validInput) {
-			System.out.println("--------------------------");
-			System.out.print("Customer's Last Name: ");
-			lastName = scanner.nextLine().trim();
-			if (lastName.isEmpty()) {
-				System.out.println("Customer's Last name cannot be empty. Please try again.");
-			}
-			else {
-				validInput = true;
-			}
-		}
-		
-		System.out.println("---------------------------------------------------------");
-		ID = bankFacade.generateID("CUSTOMER");
-		System.out.println("Generated Deposit Account ID: " + ID);
-		
-		validInput = false;
-		while(!validInput) {
-			System.out.println("---------------------------------------------------------");
-			System.out.print("Account Password (must be 6 digits): ");
-            password = scanner.nextLine().trim();
-            // Şifre tam 6 rakamdan oluşuyorsa döngüden çık
-            if (password.matches("\\d{6}")) {
-                validInput = true;
-            } else {
-                System.out.println("Invalid format! Account Password must be exactly 6 digits.");
-            }
-		}
 		
 		validInput = false;
 		while (!validInput) {
@@ -168,7 +200,7 @@ public class AccountCreationHandler {
 			
 		}
 		
-		bankFacade.createDepositAccount(firstName, lastName, ID, password, balance, months);
+		bankFacade.createDepositAccount(user.getName(), user.getSurname(), user.getUserId(), user.getHashedPassword(), balance, months);
 	}
 	
 	
@@ -176,52 +208,10 @@ public class AccountCreationHandler {
 	 * Handles the account creation process by prompting the user for their details and 
 	 * creating a new currency account using the AccountManager.
 	 */
-	public void createCurrencyAccount() {
-		boolean validInput = false; String firstName = ""; String lastName = ""; long ID = 0; String password = ""; double balance = 0.0;
+	public void createCurrencyAccount(User user) {
+		boolean validInput = false; double balance = 0.0;
 		String currency = "";
 		System.out.println("Please enter your details to create a new account.");
-		
-		while (!validInput) {
-			System.out.println("--------------------------");
-			System.out.print("Customer's First Name: ");
-			firstName = scanner.nextLine().trim();
-			if (firstName.isEmpty()) {
-				System.out.println("Customer's First name cannot be empty. Please try again.");
-			}
-			else {
-				validInput = true;
-			}
-		}
-		
-		validInput = false;
-		while (!validInput) {
-			System.out.println("--------------------------");
-			System.out.print("Customer's Last Name: ");
-			lastName = scanner.nextLine().trim();
-			if (lastName.isEmpty()) {
-				System.out.println("Customer's Last name cannot be empty. Please try again.");
-			}
-			else {
-				validInput = true;
-			}
-		}
-		
-		System.out.println("---------------------------------------------------------");
-		ID = bankFacade.generateID("CUSTOMER");
-		System.out.println("Generated Currency Account ID: " + ID);
-		
-		validInput = false;
-		while(!validInput) {
-			System.out.println("---------------------------------------------------------");
-			System.out.print("Account Password (must be 6 digits): ");
-            password = scanner.nextLine().trim();
-            // Şifre tam 6 rakamdan oluşuyorsa döngüden çık
-            if (password.matches("\\d{6}")) {
-                validInput = true;
-            } else {
-                System.out.println("Invalid format! Account Password must be exactly 6 digits.");
-            }
-		}
 		
 		validInput = false;
 		while (!validInput) {
@@ -246,7 +236,7 @@ public class AccountCreationHandler {
 			System.out.print("Currency ('USD' or 'EUR'): ");
             currency = scanner.nextLine().trim().toUpperCase();
             // Şifre tam 6 rakamdan oluşuyorsa döngüden çık
-            if (password.equals("USD") || password.equals("EUR")) {
+            if (currency.equals("USD") || currency.equals("EUR")) {
                 validInput = true;
             } else {
                 System.out.println("Invalid format! Currency must be exactly USD or EUR.");
@@ -254,7 +244,7 @@ public class AccountCreationHandler {
 			
 		}
 		
-		bankFacade.createCurrencyAccount(firstName, lastName, ID, password, balance, currency);
+		bankFacade.createCurrencyAccount(user.getName(), user.getSurname(), user.getUserId(), user.getHashedPassword(), balance, currency);
 	}
 	
 	

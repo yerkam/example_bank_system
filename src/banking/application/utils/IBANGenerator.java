@@ -7,8 +7,8 @@ import java.util.Scanner;
 import banking.infrastructure.FileHandler;
 
 public class IBANGenerator {
-	private static FileHandler fileHandler = new FileHandler();
-    private static String accountsFolderPath = fileHandler.getAccountsFolderPath();
+	private FileHandler fileHandler = FileHandler.getInstance();
+    private String accountsFolderPath = fileHandler.getAccountsFolderPath();
 
     /**
      * Generates a unique IBAN for new checking accounts.

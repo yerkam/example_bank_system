@@ -1,22 +1,22 @@
 package banking.domain.users;
 
 public abstract class User {
-	protected long id;
+	protected long userId;
 	protected String name;
 	protected String surname;
 	protected String hashedPassword;
 	protected String role;
 	
-	public User(long id, String name, String surname, String hashedPassword, String role) {
-		this.id = id;
+	public User(long userId, String name, String surname, String hashedPassword, String role) {
+		this.userId = userId;
 		this.name = name;
 		this.surname = surname;
 		this.hashedPassword = hashedPassword;
 		this.role = role;
 	}
 
-	public long getId() {
-		return id;
+	public long getUserId() {
+		return userId;
 	}
 
 	public String getName() {
