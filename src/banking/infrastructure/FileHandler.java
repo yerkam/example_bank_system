@@ -1,9 +1,12 @@
 package banking.infrastructure;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import banking.domain.users.User;
 
 /**
  * Handles initialization of the folder structure for the banking system.
@@ -34,7 +37,6 @@ public class FileHandler {
     private final String employeesFile;
     private final String managersFile;
     private final String frozenAccountsFile;
-    private final String loginDetailsFile;
     
     public FileHandler() {
         String folderName = "data";
@@ -53,9 +55,9 @@ public class FileHandler {
         this.employeesFile = usersFolderPath + File.separator + "Employees.txt";
         this.managersFile = usersFolderPath + File.separator + "Managers.txt";
         this.frozenAccountsFile = dataFolderName + File.separator + "FrozenAccounts.txt";
-        this.loginDetailsFile = dataFolderName + File.separator + "LoginDetails.txt";
         
         initializeFolderStructure();
+        instantiateManager();
     }
 
     /**
@@ -126,11 +128,6 @@ public class FileHandler {
             if (!Files.exists(frozenAccountsPath)) {
                 Files.createFile(frozenAccountsPath);
             }
-            
-            Path loginDetailsPath = Paths.get(loginDetailsFile);
-            if (!Files.exists(loginDetailsPath)) {
-				Files.createFile(loginDetailsPath);
-			}
 
         } catch (Exception e) {
             System.out.println("An error occurred while initializing folder structure: " + e.getMessage());
@@ -173,15 +170,52 @@ public class FileHandler {
         return frozenAccountsFile;
     }
     
-    public String getLoginDetailsFile() {
-		return loginDetailsFile;
-	}
-    
     public static FileHandler getInstance() {
 		if (instance == null) {
 			instance = new FileHandler();
 		}
 		return instance;
 	}
+    
+    public void instantiateManager() {
+    	if (!managerExists(5001)) {
+    		String filePath = getManagersFile();
+    	    try (FileWriter writer = new FileWriter(filePath, true)) {
+    	        writer.write(
+    	            "5001" + "#" + "Manager" + "#" + "One" + "#" +
+    	            SecurityUtil.hashText("123456") + "#" + "MANAGER" + "\n");
+    	        
+    	        System.out.println("MANAGER account created with ID: 5001 and password: 12345");
+    	    } 
+    	    catch (Exception e) {
+    	        System.out.println("Error initiating MANAGER: " + e.getMessage());
+    	    }
+    	}
+		
+	}
+    
+   
+	public boolean managerExists(long id) {
+    	String filePath = getManagersFile();
+	    Path path = Paths.get(filePath);
+	    try {
+	        if (!Files.exists(path)) {
+	            return false;
+	        }
+	        for (String line : Files.readAllLines(path)) {
+	            String[] parts = line.split("#");
+	            long storedId = Long.parseLong(parts[0]);
+	            if (storedId == id) {
+	                return true;
+	            }
+	        }
+
+	    } 
+	    catch (Exception e) {
+	        System.out.println("Error reading manager file: " + e.getMessage());
+	    }
+	    return false;
+	}
+	
 
 }
