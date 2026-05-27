@@ -3,6 +3,7 @@ package banking.application;
 import java.io.File;
 import java.util.Scanner;
 
+import banking.domain.users.Customer;
 import banking.domain.users.User;
 import banking.infrastructure.FileHandler;
 import banking.infrastructure.FileUserRepository;
@@ -69,5 +70,15 @@ public class Authentication {
 		 
 		 return userRepository.findUserById(id, role);
 	 }
+	 
+	 public Customer findCustomerById(long customerId) {
+		    User user = userRepository.findUserById(customerId, "CUSTOMER");
+		    
+		    if (user instanceof Customer customer) {
+		        return customer;
+		    }
+
+		    return null;
+	}
 
 }

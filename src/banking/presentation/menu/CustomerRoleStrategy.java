@@ -85,7 +85,7 @@ public class CustomerRoleStrategy implements RoleStrategy {
 					try {
 						System.out.print("Checking Account Number: ");
 				        int accountNumber = Integer.parseInt(scanner.nextLine());
-				        System.out.print("Loan amount: ");
+				        System.out.print("Loan amount: "); 
 				        double amount = Double.parseDouble(scanner.nextLine());
 				        System.out.print("Loan term (months): ");
 				        int months = Integer.parseInt(scanner.nextLine());

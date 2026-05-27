@@ -1,5 +1,6 @@
 package banking.application;
 
+import banking.domain.users.Customer;
 import banking.domain.users.User;
 import banking.infrastructure.AccountSummary;
 import banking.infrastructure.FileHandler;
@@ -67,6 +68,10 @@ public class BankFacade {
 	public User authenticateUser(long ID, String password, String role) {
 		return authentication.authenticateUser(ID, password, role);
 	}
+	
+	public Customer findCustomerById(long customerId) {
+	    return authentication.findCustomerById(customerId);
+}
 	
 	// Account Security Methods
 	public void freezeAccount(long ID, int durationInDays) {
