@@ -28,7 +28,7 @@ public class LoanManager {
 		return creditScoreManager.getCreditScoreBand(calculateCreditScore(userId));
 	}
 
-	public String requestLoan(long userId, double amount, int termMonths) {
+	public String requestLoan(long userId, int checkingAccountNumber, double amount, int termMonths) {
 		if (amount <= 0) {
 			return "Loan request failed: amount must be greater than 0.";
 		}
@@ -40,6 +40,10 @@ public class LoanManager {
 		if (loanRepo.findActiveLoanByUserId(userId, loansFile) != null) {
 			return "Loan request failed: an active loan already exists for this user.";
 		}
+		
+		if (!accountRepo.checkingAccountExists(userId, checkingAccountNumber)) {
+			    return "Loan request failed: checking account not found.";
+			}
 
 		int score = calculateCreditScore(userId);
 		double maxAmount = getMaxLoanAmount(score);
@@ -54,7 +58,7 @@ public class LoanManager {
 		double interestRate = getInterestRate(score);
 		LocalDateTime now = LocalDateTime.now();
 		Loan loan = new Loan(userId, amount, amount, interestRate, termMonths, "ACTIVE", now, now);
-		if (!accountRepo.adjustFirstActiveCheckingBalance(userId, accountsFolderPath, amount)) {
+		if (!accountRepo.adjustCheckingBalanceByAccountNumber(userId, checkingAccountNumber, amount)) {
 			return "Loan request failed: could not deposit funds into the user's active checking account.";
 		}
 
@@ -62,7 +66,7 @@ public class LoanManager {
 			return "Loan approved: " + amount + " granted to user " + userId + " at " + interestRate + " annual interest and deposited into the active checking account. Credit score: " + score + " (" + creditScoreManager.getCreditScoreBand(score) + ").";
 		}
 
-		accountRepo.adjustFirstActiveCheckingBalance(userId, accountsFolderPath, -amount);
+		accountRepo.adjustCheckingBalanceByAccountNumber(userId, checkingAccountNumber, -amount);
 
 		return "Loan request failed while saving the loan record.";
 	}

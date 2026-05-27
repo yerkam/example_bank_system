@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 import banking.application.BankFacade;
 import banking.domain.users.User;
+import banking.infrastructure.AccountSummary;
 import banking.presentation.utils.AccountCreationHandler;
 import banking.presentation.utils.CardCreationHandler;
 
@@ -36,10 +37,9 @@ public class CustomerRoleStrategy implements RoleStrategy {
 			System.out.println(" -- 'CCA'     : Enter the letter 'CCA' to Create a new credit card...");
 			System.out.println(" -- 'DCA'     : Enter the letter 'DCA' to Create a new debit card...");
 			System.out.println(" -- 'VA'      : Enter the letter 'VA' to View your account details...");
-			System.out.println(" -- 'VT'      : Enter the letter 'VT' to View your transaction history...");
-			System.out.println(" -- 'TR'      : Enter the letters 'TR' to Transfer money...");
 			System.out.println(" -- 'TL'      : Enter the letters 'TL' to Take loans...");
-			System.out.println(" -- 'RSP'     : Enter the letters 'RSP' to Reset Password...");
+			System.out.println(" -- 'RL'      : Enter the letters 'TL' to Repay loans...");
+			System.out.println(" -- 'CS'      : Enter the letters 'TL' to View your credit score...");
 			System.out.println(" -- 'EXIT'    : Enter the letters 'EXIT' to Exit the program...");
 			System.out.println("-------------------------------------------------------------------------------------------------");
 			
@@ -69,19 +69,55 @@ public class CustomerRoleStrategy implements RoleStrategy {
 					cardCreationHandler.createDebitCard(loggedInUser);
 					break;
 				case "VA":
+					AccountSummary summary = bankFacade.getAccountSummary(loggedInUser.getUserId());
 					
-					break;
-				case "VT":
-					
-					break;
-				case "TR":
-					
+					System.out.println("------- ACCOUNT SUMMARY -------");
+
+					System.out.println(" - Total Accounts: " + summary.getTotalAccounts());
+					System.out.println(" - Checking Accounts: " + summary.getCheckingAccounts());
+					System.out.println(" - Deposit Accounts: " + summary.getDepositAccounts());
+					System.out.println(" - Currency Accounts: " + summary.getCurrencyAccounts());
+					System.out.println(" - Debit Cards: " + summary.getDebitCards());
+					System.out.println(" - Credit Cards: " + summary.getCreditCards());
+					System.out.println(" - Total Balance: " + summary.getTotalBalance());
 					break;
 				case "TL":
-					
+					try {
+						System.out.print("Checking Account Number: ");
+				        int accountNumber = Integer.parseInt(scanner.nextLine());
+				        System.out.print("Loan amount: ");
+				        double amount = Double.parseDouble(scanner.nextLine());
+				        System.out.print("Loan term (months): ");
+				        int months = Integer.parseInt(scanner.nextLine());
+
+				        String result = bankFacade.requestLoan(loggedInUser.getUserId(), accountNumber, amount, months);
+				        System.out.println(result);
+
+				    } 
+					catch (NumberFormatException e) {
+				        System.out.println("Invalid input.");
+				    }
 					break;
-				case "RSP":
-					
+				case "RL":
+					try {
+				        System.out.print("Repayment amount: ");
+				        double amount = Double.parseDouble(scanner.nextLine());
+
+				        String result = bankFacade.repayLoan(loggedInUser.getUserId(), amount);
+				        System.out.println(result);
+
+				    } 
+					catch (NumberFormatException e) {
+				        System.out.println("Invalid amount.");
+				    }
+					break;
+				case "CS":
+					int score = bankFacade.getCreditScore(loggedInUser.getUserId());
+
+				    String band = bankFacade.getCreditScoreBand(loggedInUser.getUserId());
+
+				    System.out.println("Credit Score: " + score);
+				    System.out.println("Rating: " + band);
 					break;
 				case "EXIT":
 					menuChoice = true;

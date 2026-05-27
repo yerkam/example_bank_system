@@ -24,9 +24,15 @@ public interface AccountRepository {
     
     boolean adjustFirstActiveCheckingBalance(long userId, String accountsFolderPath, double amount);
     
+    boolean adjustCheckingBalanceByAccountNumber(long userId, int accountNumber, double amount);
+    
     void saveCheckingAccount(long userId, CheckingAccount account);
 
 	void saveDepositAccount(long userId, DepositAccount account);
 	
 	void saveCurrencyAccount(long userId, CurrencyAccount account);
+	
+	public AccountSummary getAccountSummary(long userId);
+	
+	boolean checkingAccountExists(long userId, int accountNumber);
 }

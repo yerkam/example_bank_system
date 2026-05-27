@@ -1,6 +1,8 @@
 package banking.application;
 
 import banking.domain.users.User;
+import banking.infrastructure.AccountSummary;
+import banking.infrastructure.FileHandler;
 
 public class BankFacade {
 	
@@ -8,6 +10,13 @@ public class BankFacade {
 	private CardManager cardManager;
 	private Authentication authentication;
 	private AccountSecurityManager accountSecurityManager;
+	private LoanManager loanManager;
+	
+	// Singleton instance of FileHandler to manage file paths and operations
+	private final FileHandler fileHandler = FileHandler.getInstance();
+    private String accountsFolderPath = fileHandler.getAccountsFolderPath();
+    private String creditCardsFile = fileHandler.getCreditCardsFile();
+    private String loansFile = fileHandler.getLoansFile();
 	
 	
 	// Constructor to initialize the BankFacade with the necessary managers and authentication
@@ -16,6 +25,7 @@ public class BankFacade {
 		this.cardManager = cardManager;
 		this.authentication = authentication;
 		this.accountSecurityManager = accountSecurityManager;
+		loanManager = new LoanManager(accountsFolderPath, creditCardsFile, loansFile);
 	}
 	
 	// Account Creation Methods
@@ -54,10 +64,6 @@ public class BankFacade {
 	 * @param password The password to check.
 	 * @return true if the account exists, false otherwise.
 	 */
-//	public boolean doesAccountExist(long ID, String password, String role) {
-//		return authentication.login(ID, password, role);
-//	}
-	
 	public User authenticateUser(long ID, String password, String role) {
 		return authentication.authenticateUser(ID, password, role);
 	}
@@ -72,6 +78,25 @@ public class BankFacade {
 	}
 	
 	
+	public AccountSummary getAccountSummary(long userId) {
+	    return accountManager.getAccountSummary(userId);
+	}
 	
+	// Loan Methods
+	public String requestLoan(long userId, int checkingAccountNumber, double amount, int termMonths) {
+	    return loanManager.requestLoan(userId, checkingAccountNumber, amount, termMonths);
+	}
+
+	public String repayLoan(long userId, double amount) {
+	    return loanManager.repayLoan(userId, amount);
+	}
+
+	public int getCreditScore(long userId) {
+	    return loanManager.calculateCreditScore(userId);
+	}
+
+	public String getCreditScoreBand(long userId) {
+	    return loanManager.getCreditScoreBand(userId);
+	}
 
 }

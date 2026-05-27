@@ -18,6 +18,7 @@ import banking.domain.accounts.DepositAccount;
 import banking.domain.users.Customer;
 import banking.domain.users.Employee;
 import banking.infrastructure.AccountRepository;
+import banking.infrastructure.AccountSummary;
 import banking.infrastructure.FileHandler;
 import banking.infrastructure.UserRepository;
 
@@ -149,6 +150,10 @@ public class AccountManager {
     
     public boolean doesUserExist(long id, String role) {
     	return userRepository.userExists(id, role.toUpperCase());
+    }
+    
+    public AccountSummary getAccountSummary(long userId) {
+        return accountRepository.getAccountSummary(userId);
     }
     
 

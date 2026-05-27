@@ -24,6 +24,7 @@ public class FileAccountRepository implements AccountRepository {
 	// Singleton instance of FileHandler to manage file paths and operations
 	private final FileHandler fileHandler = FileHandler.getInstance();
     private String accountsFolderPath = fileHandler.getAccountsFolderPath();
+    private String creditCardsFile = fileHandler.getCreditCardsFile();
     
     
     /**
@@ -181,7 +182,47 @@ public class FileAccountRepository implements AccountRepository {
 
         return false;
     }
-		
+    
+    
+    @Override
+    public boolean adjustCheckingBalanceByAccountNumber(long userId, int accountNumber, double amount) {
+        try {
+            File userFile = new File(accountsFolderPath + File.separator + userId + ".txt");
+            if (!userFile.exists()) {
+                return false;
+            }
+
+            java.util.List<String> lines = Files.readAllLines(userFile.toPath());
+
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i).trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
+                String[] parts = line.split("#");
+                if (parts[0].equals("Checking") && Integer.parseInt(parts[1]) == accountNumber) {
+                    double currentBalance = Double.parseDouble(parts[2]);
+                    currentBalance += amount;
+                    if (currentBalance < 0) {
+                        return false;
+                    }
+                    parts[2] = String.valueOf(currentBalance);
+
+                    lines.set(i, String.join("#", parts));
+
+                    Files.write(userFile.toPath(), lines);
+                    return true;
+                }
+            }
+        }
+        catch (Exception e) {
+            System.out.println("Error adjusting balance: " + e.getMessage());
+        }
+
+        return false;
+    }
+    
+    
 	
     /**
 	 * Saves a checking account for a user. If the user's file does not exist, it creates one with the user's info.
@@ -240,6 +281,98 @@ public class FileAccountRepository implements AccountRepository {
             System.out.println("An error occurred while creating the currency account: " + e.getMessage());
         }
 		
+	}
+	
+	
+	public AccountSummary getAccountSummary(long userId) {
+	    int checking = 0; int deposit = 0;  int currency = 0;
+	    int debitCards = 0; int creditCards = 0;
+	    double totalBalance = 0;
+
+	    String filePath = accountsFolderPath + File.separator + userId + ".txt"; 
+	    Path path = Paths.get(filePath);
+
+	    try {
+	        if (Files.exists(path)) {
+	            for (String line : Files.readAllLines(path)) {
+	                line = line.trim();
+	                if (line.isEmpty()) {
+	                    continue;
+	                }
+
+	                String[] parts = line.split("#");
+	                switch (parts[0]) {
+	                    case "Checking":
+	                        checking++;
+	                        totalBalance +=  Double.parseDouble(parts[2]);
+	                        // Does the debit card exists?
+	                        if (parts.length > 5) {
+	                            debitCards++;
+	                        }
+	                        break;
+	                    case "Deposit":
+	                        deposit++;
+	                        totalBalance += Double.parseDouble(parts[2]); 
+	                        break;
+	                    case "Currency":
+	                        currency++;
+	                        totalBalance += Double.parseDouble(parts[2]); 
+	                        break;
+	                }
+	            }
+	        }
+	    } catch (Exception e) {
+	        System.out.println("Error reading accounts: " + e.getMessage());
+	    }
+
+	    // Count credit cards
+	    try {
+	        Path creditPath = Paths.get(creditCardsFile);
+	        if (Files.exists(creditPath)) {
+	            for (String line : Files.readAllLines(creditPath)) {
+	                line = line.trim();
+	                if (line.isEmpty()) {
+	                    continue;
+	                }
+	                String[] parts = line.split("#");
+	                long storedUserId = Long.parseLong(parts[6]);
+	                if (storedUserId == userId) {
+	                    creditCards++;
+	                }
+	            }
+	        }
+
+	    } catch (Exception e) {
+
+	        System.out.println("Error reading credit cards: " + e.getMessage()
+	        );
+	    }
+
+	    return new AccountSummary(checking + deposit + currency, checking, deposit,
+	            currency, debitCards, creditCards, totalBalance);
+	}
+	
+	@Override
+	public boolean checkingAccountExists(long userId, int accountNumber) {
+	    try {
+	        File userFile = new File(accountsFolderPath + File.separator + userId + ".txt");
+	        if (!userFile.exists()) {
+	            return false;
+	        }
+
+	        java.util.List<String> lines = Files.readAllLines(userFile.toPath());
+
+	        for (String line : lines) {
+	            String[] parts = line.split("#");
+	            if (parts[0].equals("Checking") && Integer.parseInt(parts[1]) == accountNumber) {
+	                return true;
+	            }
+	        }
+	    }
+	    catch (Exception e) {
+	        System.out.println("Error checking account existence: " + e.getMessage());
+	    }
+	    return false;
 	}
 
 		
