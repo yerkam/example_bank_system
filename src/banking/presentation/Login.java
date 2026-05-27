@@ -87,8 +87,6 @@ public class Login {
 				
 				switch (choice) {
 					case "1":
-//						System.out.println("---------------------------------------------------------");
-//						System.out.println("Welcome to the Banking System!");
 						loginProcess(loginEntity);
 						loginChoice = true;
 						break;

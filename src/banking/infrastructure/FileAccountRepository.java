@@ -375,26 +375,4 @@ public class FileAccountRepository implements AccountRepository {
 	    return false;
 	}
 
-		
-//	/**
-//     * Ensures the user file exists. If not, creates it with user info on the first line.
-//     * If the file already exists, does nothing.
-//     *
-//     * @param name     Client's name
-//     * @param surname  Client's surname
-//     * @param id       Client's ID
-//     * @param password Client's password
-//     */
-//    public void ensureUserFile(String name, String surname, long id, String password) {
-//        String filePath = getUserFilePath(id);
-//        Path path = Paths.get(filePath);
-//        String hashedPassword = banking.infrastructure.SecurityUtil.hashText(password);
-//        if (!Files.exists(path)) {
-//            try (FileWriter writer = new FileWriter(filePath)) {
-//                writer.write(name + "#" + surname + "#" + hashedPassword + "\n");
-//            } catch (Exception e) {
-//                System.out.println("Error creating user file: " + e.getMessage());
-//            }
-//        }
-//    }
 }

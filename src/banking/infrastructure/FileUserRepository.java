@@ -15,11 +15,9 @@ public class FileUserRepository implements UserRepository {
 	
 	// Singleton instance of FileHandler to manage file paths and operations
 	private final FileHandler fileHandler = FileHandler.getInstance();
-    private String accountsFolderPath = fileHandler.getAccountsFolderPath();
     private String customersfilepath = fileHandler.getCustomersFile();
     private String employeesfilepath = fileHandler.getEmployeesFile();
     private String managersfilepath = fileHandler.getManagersFile();
-	private String usersFolderPath = fileHandler.getUsersFolderPath();
 	
 	@Override
 	public void saveUser(User user) {

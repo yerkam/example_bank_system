@@ -12,5 +12,4 @@ public class UserFactory {
 		return new Employee(id, name, surname, hashedPassword);
 	}
 	
-	
 }

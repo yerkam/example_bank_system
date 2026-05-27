@@ -94,48 +94,6 @@ public class AccountCreationHandler {
 		boolean validInput = false; double balance = 0.0;
 		System.out.println("Please enter your details to create a new account.");
 		
-//		while (!validInput) {
-//			System.out.println("--------------------------");
-//			System.out.print("Customer's First Name: ");
-//			firstName = scanner.nextLine().trim();
-//			if (firstName.isEmpty()) {
-//				System.out.println("Customer's First name cannot be empty. Please try again.");
-//			}
-//			else {
-//				validInput = true;
-//			}
-//		}
-//		
-//		validInput = false;
-//		while (!validInput) {
-//			System.out.println("--------------------------");
-//			System.out.print("Customer's Last Name: ");
-//			lastName = scanner.nextLine().trim();
-//			if (lastName.isEmpty()) {
-//				System.out.println("Customer's Last name cannot be empty. Please try again.");
-//			}
-//			else {
-//				validInput = true;
-//			}
-//		}
-		
-//		System.out.println("---------------------------------------------------------");
-//		accountID = bankFacade.generateID("ACCOUNT");
-//		System.out.println("Generated Checking Account ID: " + accountID);
-		
-//		validInput = false;
-//		while(!validInput) {
-//			System.out.println("---------------------------------------------------------");
-//			System.out.print("Account Password (must be 6 digits): ");
-//            password = scanner.nextLine().trim();
-//            // Şifre tam 6 rakamdan oluşuyorsa döngüden çık
-//            if (password.matches("\\d{6}")) {
-//                validInput = true;
-//            } else {
-//                System.out.println("Invalid format! Account Password must be exactly 6 digits.");
-//            }
-//		}
-		
 		validInput = false;
 		while (!validInput) {
 			System.out.println("---------------------------------------------------------");

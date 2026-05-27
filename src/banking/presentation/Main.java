@@ -37,8 +37,5 @@ public class Main {
     	  // Starting the presentation layer
     	  new Login(bankFacade);
     	  
-    	  // Testing the Card Creation logic...
-//          cardManager.createCreditCard(1234678, "Main Doe", 10000, 28);
-//          cardManager.createDebitCard(1234678, 1, "Main Doe");
       }
 }

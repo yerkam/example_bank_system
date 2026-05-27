@@ -15,7 +15,6 @@ public class ManagerRoleStrategy implements RoleStrategy {
 	private BankFacade bankFacade;
 	private AccountCreationHandler accountCreationHandler;
 	private CardCreationHandler cardCreationHandler;
-	private User loggedInUser;
 	private FindCustomerHandler findCustomerHandler;
 	
 	public ManagerRoleStrategy(BankFacade bankFacade, AccountCreationHandler accountCreationHandler,
@@ -23,7 +22,6 @@ public class ManagerRoleStrategy implements RoleStrategy {
 		this.bankFacade = bankFacade;
 		this.accountCreationHandler = accountCreationHandler;
 		this.cardCreationHandler = cardCreationHandler;
-		this.loggedInUser = loggedInUser;
 		findCustomerHandler = new FindCustomerHandler(bankFacade);
 	}
 	

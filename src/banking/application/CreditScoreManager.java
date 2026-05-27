@@ -1,14 +1,15 @@
 package banking.application;
 
 import banking.domain.cards.CreditCard;
-import banking.infrastructure.CardRepo;
+import banking.infrastructure.CardRepository;
+import banking.infrastructure.FileCardRepository;
 import banking.infrastructure.LoanRepo;
 
 public class CreditScoreManager {
 
 	private final String creditCardsFile;
 	private final String loansFile;
-	private final CardRepo cardRepo = new CardRepo();
+	private final CardRepository cardRepo = new FileCardRepository();
 	private final LoanRepo loanRepo = new LoanRepo();
 
 	public CreditScoreManager(String creditCardsFile, String loansFile) {
@@ -19,7 +20,7 @@ public class CreditScoreManager {
 	public int calculateCreditScore(long userId) {
 		int score = 600;
 
-		CreditCard card = cardRepo.findCreditCardByUserId(userId, creditCardsFile);
+		CreditCard card = cardRepo.findCreditCardByUserId(userId);
 		if (card == null) {
 			score -= 100;
 		} else {
