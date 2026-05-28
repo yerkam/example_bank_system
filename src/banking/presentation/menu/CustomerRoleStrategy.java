@@ -38,8 +38,8 @@ public class CustomerRoleStrategy implements RoleStrategy {
 			System.out.println(" -- 'DCA'     : Enter the letter 'DCA' to Create a new debit card...");
 			System.out.println(" -- 'VA'      : Enter the letter 'VA' to View your account details...");
 			System.out.println(" -- 'TL'      : Enter the letters 'TL' to Take loans...");
-			System.out.println(" -- 'RL'      : Enter the letters 'TL' to Repay loans...");
-			System.out.println(" -- 'CS'      : Enter the letters 'TL' to View your credit score...");
+			System.out.println(" -- 'RL'      : Enter the letters 'RL' to Repay loans...");
+			System.out.println(" -- 'CS'      : Enter the letters 'CS' to View your credit score...");
 			System.out.println(" -- 'EXIT'    : Enter the letters 'EXIT' to Exit the program...");
 			System.out.println("-------------------------------------------------------------------------------------------------");
 			
