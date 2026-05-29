@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import banking.application.factories.AccountFactory;
@@ -25,12 +27,12 @@ import banking.infrastructure.UserRepository;
 /**
  * Manages account operations using per-user files.
  * Each user has their own file at data/Accounts/{id}.txt
- * 
+ *
  * File format:
  *   Line 1: name#surname#password
- *   Subsequent lines (multiple accounts of each type allowed):
+ *   Subsequent lines:
  *     Checking#accountNumber#balance#active#IBAN
- *     Checking#accountNumber#balance#active#IBAN#cardNumber#cvv#cardExpiry#holderName  (with debit card)
+ *     Checking#accountNumber#balance#active#IBAN#cardNumber#cvv#cardExpiry#holderName
  *     Deposit#accountNumber#balance#expiryDate
  *     Currency#accountNumber#balance#currencyType
  */
@@ -39,122 +41,96 @@ public class AccountManager {
     private AccountRepository accountRepository;
     private IBANGenerator ibanGenerator;
     private UserRepository userRepository;
-    
+    private final FileHandler fileHandler = FileHandler.getInstance();
+    private String accountsFolderPath = fileHandler.getAccountsFolderPath();
+
     public AccountManager(AccountRepository accountRepository, UserRepository userRepository, IBANGenerator ibanGenerator) {
-		this.userRepository = userRepository;
-		this.accountRepository = accountRepository;
-		this.ibanGenerator = ibanGenerator;
-	}
-    
-    
-    /**
-	 * Creates a checking account for the user.
-	 * If the user file doesn't exist, it will be created.
-	 * Multiple checking accounts are allowed.
-	 *
-	 * @param name     Client's name
-	 * @param surname  Client's surname
-	 * @param id       Client's ID
-	 * @param password Client's password
-	 * @param balance  Client's account balance
-	 * @param active   Client's account status
-	 */
-    public void createCheckingAccount(String name, String surname, long userId, String password, double balance, boolean active) {
-    	if (!userRepository.userExists(userId, "CUSTOMER")) {
-			Customer customer = UserFactory.createCustomer(userId, name, surname, password);
-			userRepository.saveUser(customer);
-		}
-    	
-    	
-    	int accountNumber = accountRepository.getAccountTypeCount(userId, "Checking") + 1;
-		int iban = ibanGenerator.generateIBAN();
-		
-		CheckingAccount account = AccountFactory.createCheckingAccount(accountNumber, balance, active, iban, userId);
-		accountRepository.saveCheckingAccount(userId, account);
-		
-		
-	}
-    
-    
-    /**
-	 * Creates a deposit account for the user.
-	 * If the user file doesn't exist, it will be created.
-	 * Multiple deposit accounts are allowed.
-	 *
-	 * @param name     Client's name
-	 * @param surname  Client's surname
-	 * @param id       Client's ID
-	 * @param password Client's password
-	 * @param balance  Client's account balance
-	 * @param months   Client's account duration in months
-	 */
-    public void createDepositAccount(String name, String surname, long userId, String password, double balance, int months) {
-    	if (!userRepository.userExists(userId, "CUSTOMER")) {
-			Customer customer = UserFactory.createCustomer(userId, name, surname, password);
-			userRepository.saveUser(customer);
-		}
-    	
-    	int accountNumber = accountRepository.getAccountTypeCount(userId, "Deposit") + 1;
-    	LocalDate expiryDate = LocalDate.now().plusMonths(months);
-    	
-    	DepositAccount account = AccountFactory.createDepositAccount(accountNumber, balance, expiryDate, userId, months);
-    	accountRepository.saveDepositAccount(userId, account);
-    	
+        this.userRepository = userRepository;
+        this.accountRepository = accountRepository;
+        this.ibanGenerator = ibanGenerator;
     }
-    
-    
-    /**
-	 * Creates a currency account for the user.
-	 * If the user file doesn't exist, it will be created.
-	 * Multiple currency accounts are allowed.
-	 *
-	 * @param name     Client's name
-	 * @param surname  Client's surname
-	 * @param id       Client's ID
-	 * @param password Client's password
-	 * @param balance  Client's account balance
-	 * @param months   Client's account currency type (USD or EUR)
-	 */
+
+    public void createCheckingAccount(String name, String surname, long userId, String password, double balance, boolean active) {
+        if (!userRepository.userExists(userId, "CUSTOMER")) {
+            Customer customer = UserFactory.createCustomer(userId, name, surname, password);
+            userRepository.saveUser(customer);
+        }
+        int accountNumber = accountRepository.getAccountTypeCount(userId, "Checking") + 1;
+        int iban = ibanGenerator.generateIBAN();
+        CheckingAccount account = AccountFactory.createCheckingAccount(accountNumber, balance, active, iban, userId);
+        accountRepository.saveCheckingAccount(userId, account);
+    }
+
+    public void createDepositAccount(String name, String surname, long userId, String password, double balance, int months) {
+        if (!userRepository.userExists(userId, "CUSTOMER")) {
+            Customer customer = UserFactory.createCustomer(userId, name, surname, password);
+            userRepository.saveUser(customer);
+        }
+        int accountNumber = accountRepository.getAccountTypeCount(userId, "Deposit") + 1;
+        LocalDate expiryDate = LocalDate.now().plusMonths(months);
+        DepositAccount account = AccountFactory.createDepositAccount(accountNumber, balance, expiryDate, userId, months);
+        accountRepository.saveDepositAccount(userId, account);
+    }
+
     public void createCurrencyAccount(String name, String surname, long userId, String password, double balance, String currency) {
-    	if (!currency.equals("USD") && !currency.equals("EUR")) {
+        if (!currency.equals("USD") && !currency.equals("EUR")) {
             System.out.println("Invalid currency type. Only USD and EUR are supported. Account creation failed.");
             return;
         }
-    	
-    	if (!userRepository.userExists(userId, "CUSTOMER")) {
-			Customer customer = UserFactory.createCustomer(userId, name, surname, password);
-			userRepository.saveUser(customer);
-		}
-    	
-		int accountNumber = accountRepository.getAccountTypeCount(userId, "Currency") + 1;
-		
-		CurrencyAccount account = AccountFactory.createCurrencyAccount(accountNumber, balance, currency, userId);
-		accountRepository.saveCurrencyAccount(userId, account);
-		
-	}
-    
-    public void createEmployeeAccount(String name, String surname, long id, String password) {
-		if (userRepository.userExists(id, "EMPLOYEE")) {
-			System.out.println("An employee with this ID already exists. Account creation failed.");
-			return;
-		}
-		
-		Employee employee = UserFactory.createEmployee(id, name, surname, password);
-		userRepository.saveUser(employee);
-	}
-    
-    public long generateID(String role) {
-		long newID = userRepository.getNextUserId(role);
-		return newID;
-	}
-    
-    public boolean doesUserExist(long id, String role) {
-    	return userRepository.userExists(id, role.toUpperCase());
+        if (!userRepository.userExists(userId, "CUSTOMER")) {
+            Customer customer = UserFactory.createCustomer(userId, name, surname, password);
+            userRepository.saveUser(customer);
+        }
+        int accountNumber = accountRepository.getAccountTypeCount(userId, "Currency") + 1;
+        CurrencyAccount account = AccountFactory.createCurrencyAccount(accountNumber, balance, currency, userId);
+        accountRepository.saveCurrencyAccount(userId, account);
     }
-    
+
+    public void createEmployeeAccount(String name, String surname, long id, String password) {
+        if (userRepository.userExists(id, "EMPLOYEE")) {
+            System.out.println("An employee with this ID already exists. Account creation failed.");
+            return;
+        }
+        Employee employee = UserFactory.createEmployee(id, name, surname, password);
+        userRepository.saveUser(employee);
+    }
+
+    public long generateID(String role) {
+        return userRepository.getNextUserId(role);
+    }
+
+    public boolean doesUserExist(long id, String role) {
+        return userRepository.userExists(id, role.toUpperCase());
+    }
+
     public AccountSummary getAccountSummary(long userId) {
         return accountRepository.getAccountSummary(userId);
     }
-    
 
+    /**
+     * FIX #5: Returns detailed account info for each account line.
+     * Each row: [type, accountNumber, balance, ...type-specific fields]
+     * Checking row also includes IBAN at index 4, and debit card info if present.
+     */
+    public String[][] getAccountDetails(long userId) {
+        List<String[]> results = new ArrayList<>();
+        String filePath = accountsFolderPath + File.separator + userId + ".txt";
+        Path path = Paths.get(filePath);
+        if (!Files.exists(path)) {
+            return new String[0][];
+        }
+        try {
+            List<String> lines = Files.readAllLines(path);
+            // Skip line 0 (user info header)
+            for (int i = 1; i < lines.size(); i++) {
+                String line = lines.get(i).trim();
+                if (!line.isEmpty()) {
+                    results.add(line.split("#"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error reading account details: " + e.getMessage());
+        }
+        return results.toArray(new String[0][]);
+    }
 }
