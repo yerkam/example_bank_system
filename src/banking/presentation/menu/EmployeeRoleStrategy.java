@@ -43,8 +43,8 @@ public class EmployeeRoleStrategy implements RoleStrategy {
 			System.out.println(" -- 'DCA'     : Enter the letter 'DCA' to Create a new debit card for the customer...");
 			System.out.println(" -- 'VA'      : Enter the letter 'VA' to View your account details for the customer...");
 			System.out.println(" -- 'TL'      : Enter the letters 'TL' to Take loans for the customer...");
-			System.out.println(" -- 'RL'      : Enter the letters 'TL' to Repay loans for the customer...");
-			System.out.println(" -- 'CS'      : Enter the letters 'TL' to View your credit score for the customer...");
+			System.out.println(" -- 'RL'      : Enter the letters 'RL' to Repay loans for the customer...");
+			System.out.println(" -- 'CS'      : Enter the letters 'CS' to View your credit score for the customer...");
 			System.out.println(" -- 'EXIT'    : Enter the letters 'EXIT' to Exit the program...");
 			System.out.println("-------------------------------------------------------------------------------------------------");
 			
