@@ -74,6 +74,7 @@ banking/
     ├── accounts/
     ├── cards/
     └── loans/
+
 Technologies Used
 Java
 Object-Oriented Programming (OOP)
@@ -151,7 +152,7 @@ Employees	5000+
 Managers	6000+
 How to Run the Project
 Clone the Repository
-git clone https://github.com/yourusername/banking-management-system.git
+git clone https://github.com/yerkam/example_bank_system.git
 Open the Project
 
 Import the project into:
@@ -168,6 +169,7 @@ Sample Login Flow
 1. CUSTOMER LOGIN
 2. EMPLOYEE LOGIN
 3. MANAGER LOGIN
+
 Sample Customer Menu
 CC   -> Create Checking Account
 CD   -> Create Deposit Account
@@ -196,10 +198,10 @@ bankFacade.requestLoan(
     amount,
     months
 );
+
+
 Future Improvements
-
 Possible future enhancements include:
-
 Database integration (MySQL/PostgreSQL)
 Graphical User Interface (GUI)
 Online banking API integration
@@ -212,17 +214,13 @@ REST API implementation
 Educational Purpose
 
 This project was developed as an educational software engineering and object-oriented programming project to demonstrate:
-
 layered architecture,
 design patterns,
 SOLID principles,
 repository abstraction,
 and banking domain modeling.
-Author
 
-Developed by:
 
-Your Name
 License
 
 This project is open-source and available under the MIT License.
